@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Frontend API Guide — Hill Tracts Landslide Warning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f3efe6;
+      --ink: #1a2420;
+      --muted: #5c6b63;
+      --card: #fffdf8;
+      --line: #d5d0c4;
+      --safe: #1f7a4c;
+      --safe-bg: #e4f3ea;
+      --watch: #b7791f;
+      --watch-bg: #f8efd8;
+      --danger: #b42318;
+      --danger-bg: #fce8e6;
+      --accent: #0f5c4c;
+      --code-bg: #1e2a26;
+      --code-ink: #d7e6df;
+      --shadow: 0 12px 40px rgba(26, 36, 32, 0.08);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "DM Sans", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 500px at 10% -10%, #dce8e2 0%, transparent 55%),
+        radial-gradient(900px 400px at 100% 0%, #efe6d4 0%, transparent 50%),
+        var(--bg);
+      line-height: 1.55;
+    }
+    a { color: var(--accent); }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 40px 20px 80px; }
+    header {
+      display: grid;
+      gap: 18px;
+      margin-bottom: 36px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--line);
+    }
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+    }
+    .lede { margin: 0; max-width: 62ch; color: var(--muted); font-size: 1.05rem; }
+    .meta {
+      display: flex; flex-wrap: wrap; gap: 10px;
+    }
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border-radius: 999px;
+      background: var(--card); border: 1px solid var(--line);
+      font-size: 13px; font-weight: 600;
+    }
+    .pill code {
+      font-family: "IBM Plex Mono", monospace;
+      font-weight: 500; font-size: 12px;
+      background: #eef3f0; padding: 2px 6px; border-radius: 6px;
+    }
+    nav.toc {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin: 8px 0 8px;
+    }
+    nav.toc a {
+      text-decoration: none;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: var(--shadow);
+    }
+    nav.toc a span { display: block; color: var(--muted); font-weight: 500; font-size: 12px; margin-top: 4px; }
+    section {
+      margin-top: 42px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+    section h2 {
+      margin: 0 0 8px;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+    }
+    section .hint { margin: 0 0 18px; color: var(--muted); }
+    .screen-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .screen {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      background: #faf8f2;
+    }
+    .screen strong { display: block; margin-bottom: 6px; }
+    .screen code {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 12px;
+      color: var(--accent);
+    }
+    .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    @media (max-width: 700px) { .levels { grid-template-columns: 1fr; } }
+    .level {
+      border-radius: 12px; padding: 14px; border: 1px solid transparent;
+    }
+    .level.safe { background: var(--safe-bg); color: var(--safe); }
+    .level.watch { background: var(--watch-bg); color: var(--watch); }
+    .level.danger { background: var(--danger-bg); color: var(--danger); }
+    .level b { display: block; font-size: 1.05rem; margin-bottom: 4px; }
+    .level p { margin: 0; font-size: 13px; opacity: 0.9; }
+    .ep {
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+      margin-top: 18px;
+    }
+    .ep:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+    .method {
+      display: inline-block;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: #dceee6;
+      color: var(--accent);
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .path {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .ep h3 { margin: 0 0 8px; font-size: 1.05rem; }
+    .ep p { margin: 0 0 12px; color: var(--muted); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin: 10px 0 14px;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+    code, pre { font-family: "IBM Plex Mono", monospace; }
+    pre {
+      margin: 0;
+      background: var(--code-bg);
+      color: var(--code-ink);
+      border-radius: 12px;
+      padding: 14px 16px;
+      overflow: auto;
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+    .rules { display: grid; gap: 10px; }
+    .rule {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border-radius: 12px;
+      background: #faf8f2;
+      border: 1px solid var(--line);
+    }
+    .rule i {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: grid; place-items: center;
+      background: var(--accent); color: white;
+      font-style: normal; font-weight: 700; font-size: 13px;
+    }
+    footer {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">Frontend developer guide</div>
+      <h1>Hill Tracts Landslide Early Warning API</h1>
+      <p class="lede">
+        Use these five read-only endpoints to build the map, hill detail, charts, and alert feed.
+        No subscribe / phone / push APIs — this backend only serves data for the UI.
+      </p>
+      <div class="meta">
+        <div class="pill">Base URL <code>http://localhost:8000</code></div>
+        <div class="pill">OpenAPI <code>/docs</code></div>
+        <div class="pill">This guide <code>/guide</code></div>
+        <div class="pill">CORS open for local frontend</div>
+      </div>
+      <nav class="toc" aria-label="Jump">
+        <a href="#screens">Screens<span>what to call where</span></a>
+        <a href="#levels">Status colours<span>SAFE / WATCH / DANGER</span></a>
+        <a href="#endpoints">Endpoints<span>fields + examples</span></a>
+        <a href="#alerts">When alerts fire<span>rules for the UI</span></a>
+      </nav>
+    </header>
+
+    <section id="screens">
+      <h2>Screen → endpoint map</h2>
+      <p class="hint">Wire each screen to one primary call. Poll every 30–60s if you want live-feeling updates.</p>
+      <div class="screen-grid">
+        <div class="screen">
+          <strong>1. Map</strong>
+          <code>GET /api/hills</code>
+          <p style="margin:8px 0 0;color:var(--muted);font-size:13px">Markers from <code>lat</code>/<code>lon</code>. Colour from <code>status.level</code>.</p>
+        </div>
+        <div class="screen">
+          <strong>2. Hill detail</strong>
+          <code>GET /api/hills/{id}</code>
+          <p style="margin:8px 0 0;color:var(--muted);font-size:13px">Shows sensors + NISAR + reasons.</p>
+        </div>
+        <div class="screen">
+          <strong>3. Charts</strong>
+          <code>GET /api/hills/{id}/history</code>
+          <p style="margin:8px 0 0;color:var(--muted);font-size:13px">~7 days, 10-min samples (~1008 points).</p>
+        </div>
+        <div class="screen">
+          <strong>4. Alerts</strong>
+          <code>GET /api/alerts</code>
+          <p style="margin:8px 0 0;color:var(--muted);font-size:13px">Use <code>message_bn</code> / <code>message_en</code>.</p>
+        </div>
+        <div class="screen">
+          <strong>5. About (optional)</strong>
+          <code>GET /api/model-info</code>
+          <p style="margin:8px 0 0;color:var(--muted);font-size:13px">ROC-AUC + feature importance.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="levels">
+      <h2>Status colours</h2>
+      <p class="hint">Always take the colour from <code>status.level</code> — never invent your own thresholds in the UI.</p>
+      <div class="levels">
+        <div class="level safe"><b>SAFE</b><p>Green — low risk. Probability usually &lt; 0.30.</p></div>
+        <div class="level watch"><b>WATCH</b><p>Amber — elevated. Model high but NISAR not confirmed, or mid probability.</p></div>
+        <div class="level danger"><b>DANGER</b><p>Red — show alert. Hold up to 24h via <code>danger_until</code>.</p></div>
+      </div>
+    </section>
+
+    <section id="endpoints">
+      <h2>Endpoints &amp; response shapes</h2>
+      <p class="hint">All responses are JSON. Times are ISO-8601 UTC strings.</p>
+
+      <article class="ep">
+        <h3><span class="method">GET</span><span class="path">/api/hills</span></h3>
+        <p>Map list — array of hills.</p>
+        <table>
+          <thead><tr><th>Field</th><th>Use in UI</th></tr></thead>
+          <tbody>
+            <tr><td><code>hill_id</code>, <code>name</code>, <code>district</code></td><td>Label / navigation</td></tr>
+            <tr><td><code>lat</code>, <code>lon</code></td><td>Map marker</td></tr>
+            <tr><td><code>status.level</code></td><td>Marker colour</td></tr>
+            <tr><td><code>status.probability</code></td><td>Optional badge 0–1</td></tr>
+            <tr><td><code>latest_reading.*</code></td><td>Popup summary</td></tr>
+          </tbody>
+        </table>
+        <pre>fetch("http://localhost:8000/api/hills")
+  .then(r => r.json())
+  .then(hills => {
+    // hills[0].status.level === "DANGER" | "WATCH" | "SAFE"
+  })</pre>
+      </article>
+
+      <article class="ep">
+        <h3><span class="method">GET</span><span class="path">/api/hills/{hill_id}</span></h3>
+        <p>Detail page — one object.</p>
+        <table>
+          <thead><tr><th>Block</th><th>Fields</th></tr></thead>
+          <tbody>
+            <tr><td>Hill</td><td><code>name</code>, <code>district</code>, <code>slope_deg</code>, <code>device_id</code></td></tr>
+            <tr><td><code>latest_reading</code></td><td><code>soil_moisture</code>, <code>humidity</code>, <code>temperature</code>, <code>wind_speed</code>, <code>acceleration</code>, <code>ts</code></td></tr>
+            <tr><td><code>nisar</code></td><td><code>nisar_soil_moisture</code>, <code>los_velocity_mm_month</code>, <code>coherence</code>, <code>nisar_date</code></td></tr>
+            <tr><td><code>status</code></td><td><code>level</code>, <code>probability</code>, <code>reasons[]</code>, <code>verified_by_nisar</code>, <code>danger_until</code></td></tr>
+          </tbody>
+        </table>
+        <pre>{
+  "hill_id": 3,
+  "name": "Chimbuk Hill",
+  "nisar": { "nisar_soil_moisture": 0.3224, "los_velocity_mm_month": 211.59, "coherence": 0.0873 },
+  "latest_reading": { "soil_moisture": 0.431, "acceleration": 0.0798, "ts": "2026-11-12T07:53:00+00:00" },
+  "status": {
+    "level": "DANGER",
+    "probability": 0.683,
+    "verified_by_nisar": true,
+    "reasons": ["Soil moisture high (0.43 m3/m3)", "NISAR soil moisture confirms wet ground (0.32)"],
+    "danger_until": "2026-11-13T07:56:01+00:00"
+  }
+}</pre>
+      </article>
+
+      <article class="ep">
+        <h3><span class="method">GET</span><span class="path">/api/hills/{hill_id}/history?limit=1100</span></h3>
+        <p>Chart series — chronological array (oldest → newest). Default limit covers ~7 days.</p>
+        <table>
+          <thead><tr><th>Field</th><th>Chart series</th></tr></thead>
+          <tbody>
+            <tr><td><code>ts</code></td><td>X axis</td></tr>
+            <tr><td><code>soil_moisture</code></td><td>Main risk series (0–0.5)</td></tr>
+            <tr><td><code>humidity</code>, <code>temperature</code>, <code>wind_speed</code></td><td>Weather context</td></tr>
+            <tr><td><code>acceleration</code></td><td>Ground movement spikes</td></tr>
+          </tbody>
+        </table>
+        <pre>// Example point
+{ "ts": "2026-11-12T07:53:00+00:00", "soil_moisture": 0.431, "humidity": 88.1,
+  "temperature": 26.7, "wind_speed": 9.8, "acceleration": 0.0798 }</pre>
+      </article>
+
+      <article class="ep">
+        <h3><span class="method">GET</span><span class="path">/api/alerts?limit=50</span></h3>
+        <p>Alert inbox — only created when a hill becomes <b>DANGER</b> (6h cooldown per hill).</p>
+        <pre>{
+  "id": 2,
+  "hill_id": 6,
+  "hill_name": "Kaptai Hill",
+  "level": "DANGER",
+  "probability": 0.704,
+  "message_bn": "⚠️ সতর্কতা: Kaptai Hill ...",
+  "message_en": "⚠️ ALERT: Kaptai Hill is DANGEROUS for the next 24 hours ...",
+  "created_at": "2026-11-12T07:43:31+00:00"
+}</pre>
+      </article>
+
+      <article class="ep">
+        <h3><span class="method">GET</span><span class="path">/api/model-info</span></h3>
+        <p>Optional about panel.</p>
+        <pre>{ "roc_auc": 0.663, "feature_importance": { "nisar_soil_moisture": 0.264, "..." : "..." } }</pre>
+      </article>
+    </section>
+
+    <section id="alerts">
+      <h2>When does an alert appear?</h2>
+      <p class="hint">Backend decides. Frontend only displays. DANGER needs all three:</p>
+      <div class="rules">
+        <div class="rule"><i>1</i><div><b>Model probability ≥ 0.60</b><br />Shown as <code>status.probability</code>.</div></div>
+        <div class="rule"><i>2</i><div><b>Ground sensor wet</b><br /><code>latest_reading.soil_moisture ≥ 0.32</code></div></div>
+        <div class="rule"><i>3</i><div><b>NISAR confirms</b><br />Wet satellite moisture or high creep → <code>status.verified_by_nisar === true</code></div></div>
+      </div>
+      <p style="margin:16px 0 0;color:var(--muted)">
+        If the model is high but NISAR does not confirm → <b>WATCH</b> (no panic alert).
+        After DANGER, keep showing red until <code>danger_until</code> passes (up to 24 hours).
+      </p>
+    </section>
+
+    <footer>
+      Start API: <code>uvicorn app.main:app --port 8000</code>
+      · then open <a href="/guide">/guide</a> or <a href="/docs">/docs</a>
+    </footer>
+  </div>
+</body>
+</html>

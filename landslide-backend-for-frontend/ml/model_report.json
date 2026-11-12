@@ -1,0 +1,16 @@
+{
+  "roc_auc": 0.663,
+  "feature_importance": {
+    "nisar_soil_moisture": 0.264,
+    "los_velocity_mm_month": 0.212,
+    "humidity_mean": 0.093,
+    "soil_moisture_now": 0.083,
+    "accel_max": 0.056,
+    "coherence": 0.051,
+    "soil_moisture_change": 0.05,
+    "slope_deg": 0.049,
+    "wind_max": 0.048,
+    "accel_mean": 0.047,
+    "temperature_mean": 0.046
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "Pahar Pohori",
+    "slug": "pahar-pohori",
+    "scheme": "paharpohori",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F1F1EF",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F1F1EF"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "org.paharpohori.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Your location is used to show the nearest hills and safe shelters.",
+        "NSAppTransportSecurity": { "NSAllowsArbitraryLoads": true }
+      }
+    },
+    "android": {
+      "package": "org.paharpohori.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#F1F1EF",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
+      "usesCleartextTraffic": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single",
+      "name": "Pahar Pohori — Hill landslide early warning",
+      "themeColor": "#111214"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        { "locationWhenInUsePermission": "Your location is used to show the nearest hills and safe shelters." }
+      ],
+      "expo-notifications"
+    ]
+  }
+}

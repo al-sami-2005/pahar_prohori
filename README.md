@@ -1,92 +1,146 @@
-# Pahar Prohori · পাহাড় প্রহরী
+# Pahar Pohori (পাহাড় প্রহরী)
 
-**The Hill Guardian** — a space-to-ground landslide intelligence and early-warning prototype for Chattogram and the Ukhiya–Teknaf hills.
+**Hill Tracts Landslide Early Warning System** — combining ground IoT sensor telemetry, NASA-ISRO **NISAR** radar displacement & soil moisture features, a trained Random Forest risk model, and a bilingual (**English / বাংলা**) mobile and web application for communities across the Chittagong Hill Tracts.
 
-NASA Space Apps Challenge 2026 — *Dancing with the SARs (NISAR)*.
+---
 
-> **SPACE → AI → GROUND → HUMAN ACTION**
->
-> Satellites know **where**. AI ranks **how likely**. Ground sensors reveal **when conditions are escalating**.
+## Screenshots
 
-## What the prototype demonstrates
+| Interactive Risk & Shelter Map | Hill Detail & 7-Day Telemetry |
+| :---: | :---: |
+| ![Map Dashboard](docs/screenshots/01-map-dashboard.png) | ![Hill Detail](docs/screenshots/02-hill-detail.png) |
 
-- **Mission Control:** map-first slope monitoring with Relative Risk, NISAR context and simulated sensor telemetry.
-- **Evidence Chain:** explains why the current alert is Normal, Watch, Warning or Evacuate.
-- **Monsoon Scenario:** deterministic, time-compressed 46-second simulation of rainfall → saturation → movement → local warning.
-- **July 2026 Replay:** hindsight-locked backtest interface that separates acquisition, processing availability and post-event evidence.
-- **Guardian Deployment Planner:** deterministic prototype priority ranking for limited sensor budgets.
-- **Method & Data Provenance:** clear separation of NASA data, derived indicators, simulation, illustration and validation-pending outputs.
+| Live System Pipeline & Node Monitor | Bilingual Danger Alerts (EN / বাংলা) |
+| :---: | :---: |
+| ![Live System](docs/screenshots/03-live-system.png) | ![Bilingual Alerts](docs/screenshots/04-bilingual-alerts.png) |
 
-## Run locally
+---
 
-Requirements: Node.js 18+ and npm.
+## How It Works
 
-```bash
-npm ci
-npm run dev        # http://localhost:5173
-npm run test       # deterministic unit/regression tests
-npm run lint       # oxlint
-npm run build      # typecheck + production build → dist/
-npm run check      # test → lint → build
-npm run preview    # serve dist/ (normally http://localhost:4173)
+```text
+Field Sensor Nodes (CHT-NODE-01..06) ──▶ 7-Day Archive / POST /api/ingest
+                                                   │
+NISAR Features (GUNW creep + SME2 moisture) ───────┼──▶ Random Forest Model (11 features, 30-reading window)
+                                                   │
+                                      Cross-verification & 24h DANGER hold
+                                                   │
+                                      SAFE / WATCH / DANGER ──▶ Bilingual Alerts & Shelters UI
 ```
 
-Browser QA (optional; requires local Chrome/Chromium and a running `npm run preview`):
+- **Cross-verification rule:** A hill enters **DANGER** only when the model probability meets the danger threshold (`>= 0.60`) **and** ground soil moisture is wet (`>= 0.32 m³/m³`) **and** NISAR satellite features confirm either wet soil or slope creep. Otherwise, elevated probabilities stay at **WATCH** to avoid false panic alarms.
+- **24-hour hold:** Once a hill triggers **DANGER**, the status is held for 24 hours with bilingual (Bangla + English) emergency instructions and nearest shelter routing.
 
-```bash
-CHROME_PATH="/path/to/chrome" npm run qa:browser -- http://localhost:4173/ [screenshotDir]
+---
+
+## Project Structure
+
+```text
+Pahar Pohori/
+├── docs/
+│   └── screenshots/                  # Application screenshots
+├── landslide-backend-for-frontend/   # FastAPI backend, SQLite store, ML model & sensor archive
+│   ├── app/
+│   │   ├── main.py                   # FastAPI entrypoint, API routes & static web serving
+│   │   ├── db.py                     # SQLite schema & 7-day field archive loader
+│   │   ├── predictor.py              # Random Forest inference + NISAR cross-verification
+│   │   ├── status_refresh.py         # Recomputes SAFE/WATCH/DANGER across all hills
+│   │   ├── alerts.py                 # Bilingual alert persistence with 6h cooldown
+│   │   ├── public.py                 # Summary, shelters, SOS contacts & community reports
+│   │   ├── timeline.py               # 7-day hourly risk replay (/api/risk-timeline)
+│   │   └── live.py                   # Live pipeline telemetry (/api/system-status, /api/live-feed, /api/ingest)
+│   ├── ml/                           # Feature definitions, training script & saved model artifact
+│   ├── sensors/                      # Field archive builder & ingestion utilities
+│   ├── data/                         # Hills, shelters, NISAR features & 7-day readings CSVs
+│   ├── docs/frontend-api.html        # Interactive API reference page (/guide)
+│   └── requirements.txt
+└── pahar-pohori-app/                 # Expo (SDK 58) React Native + Web bilingual frontend
+    ├── App.tsx
+    ├── src/
+    │   ├── api.ts                    # Typed API client & automatic origin resolution
+    │   ├── store.tsx                 # Global state, offline cache, queued reports & polling
+    │   ├── i18n.ts                   # English & Bangla translations
+    │   ├── screens/                  # Map, HillDetail, Alerts, SOS, Shelters, Route, Report, Settings, LiveSystem
+    │   ├── components/               # Leaflet web maps, native maps, charts & UI primitives
+    │   └── services/                 # Road routing (OSRM), rain forecast (Open-Meteo), speech (expo-speech)
+    └── package.json
 ```
 
-The browser QA checks the 46-second scenario under normal and throttled rendering, Guided Demo gating, Restart and CTA targeting; Replay hindsight locking/autoplay/date persistence; and Deployment budgets plus map ⇄ list synchronization.
+---
 
-Design-system reference (development QA): `#/system`
+## Key Features
 
-## 90-second judge flow
+- **Interactive Risk Map:** Color-coded risk pins and probability circles (`SAFE`, `WATCH`, `DANGER`), 12 community shelters, community hazard report pins, 7-day risk replay timeline, and switchable Standard / Satellite / Terrain OpenStreetMap-based layers.
+- **Hill Detail & Telemetry:** Live ground sensor tiles (soil moisture, ground shaking, humidity, temperature, wind), interactive 7-day charts, Open-Meteo rain forecast, NISAR satellite metrics, and step-by-step action guidance with text-to-speech (`expo-speech`).
+- **Live System Monitor:** Real-time pipeline telemetry showing sensor packet counts, NISAR pass status, Random Forest run latency, per-hill sparklines, and a streaming event log.
+- **Bilingual Alerts & Offline Support:** Simultaneous Bangla & English alert feed, offline device cache with built-in fallback snapshot, and automatic background submission for queued citizen hazard reports.
+- **SOS & Shelter Routing:** Press-and-hold `999` emergency dialer, national disaster hotlines (`999`, `1090`, `333`), distance-sorted shelters, and turn-by-turn walking/driving shelter routes.
 
-See [`docs/JUDGE_DEMO.md`](docs/JUDGE_DEMO.md). The safest live-demo route is:
+---
 
-1. Mission Control → select **Batali Hill · Sector 03**.
-2. Open **Why this status?** to show the Evidence Chain.
-3. Run the deterministic Monsoon Scenario through **EVACUATE**.
-4. Show the bilingual resident warning and two-independent-signal decision basis.
-5. Open **Replay** to demonstrate the temporal hindsight lock.
-6. Open **Deployment** and change the sensor budget from 5 → 10.
+## Quick Start
 
-## Scientific-integrity rules
+### 1. Backend (`landslide-backend-for-frontend`)
 
-These are product rules, not optional copy conventions:
+```bash
+cd landslide-backend-for-frontend
+python3 -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
 
-- **Relative Risk Index is a ranking, never a probability of landslide failure.**
-- **EVACUATE requires independent current-condition evidence**; high AI risk alone cannot trigger it.
-- Slope/sensor/rainfall telemetry in the interactive scenario is **simulated** and thresholds are **illustrative, not operational**.
-- NISAR catalog/pass metadata is separated from **illustrative change footprints**.
-- Replay distinguishes **acquisition time from processed-product availability** and keeps post-event evidence out of pre-event intelligence.
-- Deployment is a **prototype priority ranking**, not an optimisation or lives-saved claim.
-- Validation metrics remain **VALIDATION PENDING / NOT YET MEASURED** until the actual backtest is completed.
+- **API & Swagger Docs:** `http://localhost:8000/docs`
+- **Frontend API Guide:** `http://localhost:8000/guide`
 
-## Map and data
+### 2. Frontend (`pahar-pohori-app`)
 
-- **Offline base (always available):** `public/data/basemap.json`, built from geoBoundaries gbOpen BGD ADM3 (CC BY 4.0) and Natural Earth 10m (public domain). It provides real coastline, rivers and administrative geography.
-- **Online enhancement (optional):** OpenFreeMap vector tiles (© OpenMapTiles © OpenStreetMap contributors) and Mapzen/AWS terrarium terrain. They are added after the bundled map loads; network failure never blocks core demo layers.
-- **Demo layers (SIMULATED / ILLUSTRATIVE):** seeded slope units, Relative Risk placeholders, NISAR-change footprints and ground-node telemetry. Replace these with DEM-derived units, model output, processed GCOV/GUNW evidence and measured sensors for field work.
-- **Real metadata:** NISAR pass metadata in `src/data/nisar.ts` comes from the team's NASA CMR catalog query (24 Sep 2026).
+**Option A — Production Web Build (served directly by FastAPI on port `8000`):**
 
-## Production reliability
+```bash
+cd pahar-pohori-app
+npm install
+npm run build:web
+```
 
-- The map stays mounted across routes.
-- Scenario and Replay use centralized deterministic clocks/state.
-- A production error boundary prevents a rendering exception from becoming a blank judging screen.
-- Critical controls are keyboard accessible, alert states are not colour-only, and reduced-motion preferences are respected.
-- Core geography and demo data remain local so the project can run without network access.
+Once built, `http://localhost:8000` serves both the website and all `/api/*` endpoints from the same origin.
 
-## Project context
+**Option B — Development Mode (Expo Go on mobile + Web dev server):**
 
-See `CLAUDE.md`, `PAHAR_PROHORI_CONTEXT.md`, and `docs/` for the design, science and implementation notes used during the hackathon build.
+```bash
+cd pahar-pohori-app
+npm install
+npx expo start
+```
 
-## M8 Simple UX
+Press `w` for web (`http://localhost:8081`) or scan the QR code with **Expo Go** on the same Wi-Fi network.
 
-The final UX pass follows progressive disclosure: the map, Search, Layers, current alerts and the Monsoon Scenario stay immediately visible; technical NASA metadata, sensor diagnostics and methodology remain one click away. See `docs/M8_SIMPLE_UX.md`.
+---
 
-## M8.1 humanized UX
+## API Endpoints
 
-The final UX pass intentionally uses familiar mapping conventions: one app header, progressive disclosure, mobile bottom sheets, a compact location selector, direct search, and minimal persistent map controls. Technical detail remains available but is no longer required to understand the first screen. See `docs/M8_1_HUMANIZED_UX.md`.
+| Method | Endpoint | Purpose |
+| :--- | :--- | :--- |
+| `GET` | `/api/health` | Service health check |
+| `GET` | `/api/summary` | Status counts and 24-hour alert count |
+| `GET` | `/api/hills` | All monitored hills, latest reading, NISAR & risk status |
+| `GET` | `/api/hills/{id}` | Detailed profile, NISAR metrics, and risk reasons for one hill |
+| `GET` | `/api/hills/{id}/history` | Historical sensor readings for 7-day charts |
+| `GET` | `/api/hills/{id}/shelters` | Nearest shelters sorted by distance |
+| `GET` | `/api/risk-timeline` | Hourly 7-day ML risk replay across all hills |
+| `GET` | `/api/system-status` | Live pipeline status, node trends, and model timing |
+| `GET` | `/api/live-feed` | Incremental live pipeline event log |
+| `POST` | `/api/ingest` | Ingest a live sensor packet and recompute risk |
+| `GET` | `/api/alerts` | Bilingual `DANGER` alert history |
+| `GET` | `/api/shelters` | All shelters (optional `lat`, `lon`, `district` filters) |
+| `GET` | `/api/emergency-contacts` | Emergency hotline numbers (`999`, `1090`, `333`) |
+| `GET` / `POST` | `/api/reports` | Fetch or submit community hazard reports |
+| `GET` | `/api/model-info` | Model ROC-AUC and feature importance |
+| `POST` | `/api/refresh` | Recompute risk status for all hills |
+
+---
+
+## Tech Stack
+
+- **Backend:** Python, FastAPI, Uvicorn, SQLite, pandas, NumPy, scikit-learn, joblib
+- **Frontend:** TypeScript, React Native, Expo SDK 58, React Navigation, Leaflet, OpenStreetMap, OSRM, Open-Meteo

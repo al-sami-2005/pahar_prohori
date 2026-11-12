@@ -1,0 +1,13 @@
+shelter_id,name,name_bn,district,lat,lon,capacity,type,facilities,phone,source
+1,Shimultoli Community Shelter,শিমুলতলী কমিউনিটি আশ্রয়কেন্দ্র,Rangamati,22.6421,92.1702,350,community_center,water|toilet|first_aid|power,999,demo
+2,Rangamati Town School Shelter,রাঙামাটি শহর স্কুল আশ্রয়কেন্দ্র,Rangamati,22.6380,92.1880,600,school,water|toilet|first_aid|food|power,999,demo
+3,Bhedvedi Union Shelter,ভেদভেদী ইউনিয়ন আশ্রয়কেন্দ্র,Rangamati,22.6560,92.2060,280,union_office,water|toilet|food,999,demo
+4,Kaptai Lakeside Shelter,কাপ্তাই লেকসাইড আশ্রয়কেন্দ্র,Rangamati,22.5030,92.2090,420,school,water|toilet|first_aid|food,999,demo
+5,Kaptai Upazila Shelter,কাপ্তাই উপজেলা আশ্রয়কেন্দ্র,Rangamati,22.4870,92.2330,300,community_center,water|toilet|power,999,demo
+6,Chimbuk Road Shelter,চিম্বুক রোড আশ্রয়কেন্দ্র,Bandarban,22.0710,92.3370,200,community_center,water|toilet|first_aid,999,demo
+7,Bandarban Town Shelter,বান্দরবান শহর আশ্রয়কেন্দ্র,Bandarban,22.1950,92.2180,800,school,water|toilet|first_aid|food|power,999,demo
+8,Nilgiri Valley Shelter,নীলগিরি ভ্যালি আশ্রয়কেন্দ্র,Bandarban,21.9380,92.4010,180,community_center,water|toilet,999,demo
+9,Thanchi Road Shelter,থানচি রোড আশ্রয়কেন্দ্র,Bandarban,21.9050,92.4290,250,school,water|toilet|food,999,demo
+10,Alutila Foothill Shelter,আলুটিলা পাদদেশ আশ্রয়কেন্দ্র,Khagrachari,23.1050,91.9620,320,community_center,water|toilet|first_aid,999,demo
+11,Khagrachari Town Shelter,খাগড়াছড়ি শহর আশ্রয়কেন্দ্র,Khagrachari,23.1190,91.9840,700,school,water|toilet|first_aid|food|power,999,demo
+12,Matiranga Road Shelter,মাটিরাঙ্গা রোড আশ্রয়কেন্দ্র,Khagrachari,23.0920,91.9300,240,union_office,water|toilet,999,demo
