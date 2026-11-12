@@ -1,0 +1,4 @@
+**/*.db-journal
+**/.expo
+**/web-build
+backend/data/landslide.db-journal
