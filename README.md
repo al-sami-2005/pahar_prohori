@@ -144,3 +144,8 @@ Press `w` for web (`http://localhost:8081`) or scan the QR code with **Expo Go**
 
 - **Backend:** Python, FastAPI, Uvicorn, SQLite, pandas, NumPy, scikit-learn, joblib
 - **Frontend:** TypeScript, React Native, Expo SDK 58, React Navigation, Leaflet, OpenStreetMap, OSRM, Open-Meteo
+
+## Contributors
+
+- **Al Sami** ([@al-sami-2005](https://github.com/al-sami-2005))
+- **Masud Rana** ([@masudranaxpert](https://github.com/masudranaxpert))
