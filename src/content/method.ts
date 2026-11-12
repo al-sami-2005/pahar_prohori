@@ -98,26 +98,26 @@ export const SOURCES: readonly SourceRow[] = [
   {
     source: 'NISAR GCOV',
     gives: 'Terrain-corrected radar brightness before and after an event — surface change and new scars.',
-    status: 'Pass list real (CMR query, 24 Sep 2026). Change footprints illustrative.',
+    status: '97 GCOV swath polygons & metadata cached from data.nasa.gov / CMR (C2854338529-ASF). Change footprints illustrative until .h5 processing.',
     labels: ['nasa', 'simulated'],
   },
   {
     source: 'NISAR GUNW',
     gives: 'Interferograms — centimetre-scale ground movement and coherence loss.',
-    status: 'Pair identified (30 Jun → 12 Jul, Chattogram). Not processed yet.',
+    status: '80 GUNW interferogram granules & quicklooks cached from CMR (C2854335566-ASF). Phase unwrapping not processed yet.',
     labels: ['nasa'],
   },
   {
     source: 'GPM IMERG',
     gives: 'Satellite rainfall every 30 minutes on a 0.1° grid.',
-    status: 'Simulated field on the IMERG grid. Early-run latency is about 4 hours.',
+    status: '100 half-hourly GPM_3IMERGHHE.07 catalog records cached (HDF5 Earthdata-gated); rain rates simulated on the IMERG grid.',
     labels: ['simulated'],
   },
   {
     source: 'NASADEM',
     gives: 'Elevation and slope angle.',
-    status: 'Planned. Slope angles shown are placeholders.',
-    labels: ['simulated'],
+    status: '30 m slope angles & elevations derived from AWS/Mapzen SRTM Terrarium tiles; 5 NASADEM_HGT.001 tile records cached.',
+    labels: ['derived'],
   },
   {
     source: 'NASA Global Landslide Catalog',
@@ -128,7 +128,7 @@ export const SOURCES: readonly SourceRow[] = [
   {
     source: 'NASA LHASA',
     gives: 'Global landslide hazard nowcast — the baseline to compare against.',
-    status: 'Comparison pending.',
+    status: 'Portal & CMR sample catalog cached (GLOBAL_LANDSLIDE_NOWCAST_LHASA); comparison pending.',
     labels: ['validation-pending'],
   },
   {

@@ -21,6 +21,7 @@ export interface SlopeFeatureProps {
   slopeDeg: number
   nisar: 'detected' | 'none'
   sensorId: string | null
+  elevationM?: number
 }
 
 const BANDS: ReadonlySet<string> = new Set(['low', 'moderate', 'high', 'critical'])
@@ -96,9 +97,10 @@ export const SLOPE_PROVENANCE = {
     note: 'Replace with model output (NISAR change + GPM + NASADEM + Landslide Catalog)',
   },
   terrain: {
-    kind: 'simulated',
-    source: 'Placeholder slope angle',
-    note: 'Replace with NASADEM-derived slope',
+    kind: 'derived',
+    source: 'SRTM / Mapzen Terrarium 30 m DEM (AWS Open Data)',
+    product: 'Terrarium DEM (NASADEM_HGT.001 cataloged)',
+    note: 'Max slope across slope-unit envelope; raw NASADEM_HGT.001 tiles require Earthdata Login',
   },
 } as const satisfies Record<string, DataProvenance>
 

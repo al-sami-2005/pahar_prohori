@@ -9,6 +9,9 @@ EVERYTHING produced here is SIMULATED:
   * sensor nodes and their readings are simulated
 
 Seeded so the output never changes between runs.
+Run `python3 scripts/fetch_nasa_datasets.py` afterwards to fetch the NASA Open Data
+Portal / CMR catalog files in `src/data/nasa/` and enrich `slopes.json` + `nisar-change.json`
+with real CMR granule IDs and open SRTM/Terrarium 30 m DEM terrain values.
 Usage: python3 scripts/generate_demo_data.py
 """
 import json, math, os, random

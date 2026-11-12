@@ -1,0 +1,188 @@
+{
+  "meta": {
+    "source": "NASA Open Data Portal + NASA CMR",
+    "note": "NASA LHASA (Global Landslide Nowcast) metadata; baseline comparison pending",
+    "fetchedAt": "2026-11-12T00:43:27Z",
+    "provenance": "nasa"
+  },
+  "portalDatasets": [
+    {
+      "name": "imerg-and-lhasa-global-landslide-exposure-maps-1-0-d8b3c",
+      "title": "IMERG and LHASA Global Landslide Exposure Maps 1.0",
+      "metadataModified": "2026-11-05T07:46:19.421584",
+      "portalUrl": "https://data.nasa.gov/dataset/imerg-and-lhasa-global-landslide-exposure-maps-1-0-d8b3c",
+      "resources": [
+        {
+          "format": "JPEG",
+          "url": "https://docserver.gesdisc.eosdis.nasa.gov/public/project/Images/Global_Landslide_Exposure_Map_1.0.jpg"
+        },
+        {
+          "format": "HTML",
+          "url": "https://disc.gsfc.nasa.gov/datacollection/Global_Landslide_Exposure_Maps_1.0.html"
+        },
+        {
+          "format": "BIN",
+          "url": "https://acdisc.gesdisc.eosdis.nasa.gov/data/Landslide/Global_Landslide_Exposure_Maps.1.0/"
+        },
+        {
+          "format": "PDF",
+          "url": "https://docserver.gesdisc.eosdis.nasa.gov/public/project/Community/LHASA_IMERG/README.GlobalLandslideExposureMaps.1.0.pdf"
+        },
+        {
+          "format": "BIN",
+          "url": "https://landslides.nasa.gov/"
+        },
+        {
+          "format": "BIN",
+          "url": "https://search.earthdata.nasa.gov/search/granules?p=C2670410720-GES_DISC"
+        },
+        {
+          "format": "ISO",
+          "url": "https://cmr.earthdata.nasa.gov/search/concepts/C2670410720-GES_DISC.iso19115"
+        }
+      ]
+    },
+    {
+      "name": "global-landslide-nowcast-from-lhasa-l4-1-day-1-km-x-1-km-version-1-1-global-landslide-nowc-4ca38",
+      "title": "Global Landslide Nowcast from LHASA L4  1 day 1 km x 1 km version 1.1 (Global_Landslide_Nowcast)",
+      "metadataModified": "2026-11-05T06:12:51.262950",
+      "portalUrl": "https://data.nasa.gov/dataset/global-landslide-nowcast-from-lhasa-l4-1-day-1-km-x-1-km-version-1-1-global-landslide-nowc-4ca38",
+      "resources": [
+        {
+          "format": "PNG",
+          "url": "https://docserver.gesdisc.eosdis.nasa.gov/public/project/Images/Global_Landslide_Nowcast_1.1.png"
+        },
+        {
+          "format": "BIN",
+          "url": "https://acdisc.gesdisc.eosdis.nasa.gov/data/Landslide/Global_Landslide_Nowcast.1.1/"
+        },
+        {
+          "format": "PDF",
+          "url": "https://docserver.gesdisc.eosdis.nasa.gov/public/project/Community/LHASA/README.Global_Landslide_Nowcast.pdf"
+        },
+        {
+          "format": "BIN",
+          "url": "https://landslides.nasa.gov/"
+        },
+        {
+          "format": "BIN",
+          "url": "https://daac.gsfc.nasa.gov/datasets/Global_Landslide_Exposure_Maps_1.0/summary"
+        },
+        {
+          "format": "BIN",
+          "url": "https://search.earthdata.nasa.gov/search/granules?p=C2036912694-GES_DISC"
+        },
+        {
+          "format": "ISO",
+          "url": "https://cmr.earthdata.nasa.gov/search/concepts/C2036912694-GES_DISC.iso19115"
+        }
+      ]
+    },
+    {
+      "name": "global-landslide-nowcast-from-lhasa-l4-1-day-1-km-x-1-km-version-2-0-0-global-landslide-no-0f8e8",
+      "title": "Global Landslide Nowcast from LHASA L4 1 day 1 km x 1 km version 2.0.0 (Global_Landslide_Nowcast)",
+      "metadataModified": "2026-11-05T07:46:12.164274",
+      "portalUrl": "https://data.nasa.gov/dataset/global-landslide-nowcast-from-lhasa-l4-1-day-1-km-x-1-km-version-2-0-0-global-landslide-no-0f8e8",
+      "resources": [
+        {
+          "format": "PNG",
+          "url": "https://docserver.gesdisc.eosdis.nasa.gov/public/project/Images/Global_Landslide_Nowcast_2.0.0.png"
+        },
+        {
+          "format": "HTML",
+          "url": "https://disc.gsfc.nasa.gov/datacollection/Global_Landslide_Nowcast_2.0.0.html"
+        },
+        {
+          "format": "BIN",
+          "url": "https://acdisc.gesdisc.eosdis.nasa.gov/data/Landslide/Global_Landslide_Nowcast.2.0.0/"
+        },
+        {
+          "format": "HTML",
+          "url": "https://acdisc.gesdisc.eosdis.nasa.gov/opendap/Landslide/Global_Landslide_Nowcast.2.0.0/contents.html"
+        },
+        {
+          "format": "PDF",
+          "url": "https://docserver.gesdisc.eosdis.nasa.gov/public/project/Community/LHASA/README.Global_Landslide_Nowcast_2.0.0.pdf"
+        },
+        {
+          "format": "BIN",
+          "url": "https://landslides.nasa.gov/"
+        },
+        {
+          "format": "BIN",
+          "url": "https://www.frontiersin.org/articles/10.3389/feart.2021.640043/full"
+        },
+        {
+          "format": "BIN",
+          "url": "https://search.earthdata.nasa.gov/search/granules?p=C2654319036-GES_DISC"
+        },
+        {
+          "format": "ISO",
+          "url": "https://cmr.earthdata.nasa.gov/search/concepts/C2654319036-GES_DISC.iso19115"
+        }
+      ]
+    }
+  ],
+  "cmrSampleGranules": [
+    {
+      "conceptId": "G2041287913-GES_DISC",
+      "title": "Global_Landslide_Nowcast.1.1:Global_Landslide_Nowcast_v1.1_20000614.tif",
+      "timeStart": "2000-06-14T00:00:00.000Z",
+      "dataUrl": "https://data.gesdisc.earthdata.nasa.gov/data/Landslide/Global_Landslide_Nowcast.1.1/2000/Global_Landslide_Nowcast_v1.1_20000614.tif"
+    },
+    {
+      "conceptId": "G2041287915-GES_DISC",
+      "title": "Global_Landslide_Nowcast.1.1:Global_Landslide_Nowcast_v1.1_20000615.tif",
+      "timeStart": "2000-06-15T00:00:00.000Z",
+      "dataUrl": "https://data.gesdisc.earthdata.nasa.gov/data/Landslide/Global_Landslide_Nowcast.1.1/2000/Global_Landslide_Nowcast_v1.1_20000615.tif"
+    },
+    {
+      "conceptId": "G2041287917-GES_DISC",
+      "title": "Global_Landslide_Nowcast.1.1:Global_Landslide_Nowcast_v1.1_20000616.tif",
+      "timeStart": "2000-06-16T00:00:00.000Z",
+      "dataUrl": "https://data.gesdisc.earthdata.nasa.gov/data/Landslide/Global_Landslide_Nowcast.1.1/2000/Global_Landslide_Nowcast_v1.1_20000616.tif"
+    },
+    {
+      "conceptId": "G2041287921-GES_DISC",
+      "title": "Global_Landslide_Nowcast.1.1:Global_Landslide_Nowcast_v1.1_20000617.tif",
+      "timeStart": "2000-06-17T00:00:00.000Z",
+      "dataUrl": "https://data.gesdisc.earthdata.nasa.gov/data/Landslide/Global_Landslide_Nowcast.1.1/2000/Global_Landslide_Nowcast_v1.1_20000617.tif"
+    },
+    {
+      "conceptId": "G2041287924-GES_DISC",
+      "title": "Global_Landslide_Nowcast.1.1:Global_Landslide_Nowcast_v1.1_20000618.tif",
+      "timeStart": "2000-06-18T00:00:00.000Z",
+      "dataUrl": "https://data.gesdisc.earthdata.nasa.gov/data/Landslide/Global_Landslide_Nowcast.1.1/2000/Global_Landslide_Nowcast_v1.1_20000618.tif"
+    },
+    {
+      "conceptId": "G2041287927-GES_DISC",
+      "title": "Global_Landslide_Nowcast.1.1:Global_Landslide_Nowcast_v1.1_20000619.tif",
+      "timeStart": "2000-06-19T00:00:00.000Z",
+      "dataUrl": "https://data.gesdisc.earthdata.nasa.gov/data/Landslide/Global_Landslide_Nowcast.1.1/2000/Global_Landslide_Nowcast_v1.1_20000619.tif"
+    },
+    {
+      "conceptId": "G2041287929-GES_DISC",
+      "title": "Global_Landslide_Nowcast.1.1:Global_Landslide_Nowcast_v1.1_20000620.tif",
+      "timeStart": "2000-06-20T00:00:00.000Z",
+      "dataUrl": "https://data.gesdisc.earthdata.nasa.gov/data/Landslide/Global_Landslide_Nowcast.1.1/2000/Global_Landslide_Nowcast_v1.1_20000620.tif"
+    },
+    {
+      "conceptId": "G2041287932-GES_DISC",
+      "title": "Global_Landslide_Nowcast.1.1:Global_Landslide_Nowcast_v1.1_20000621.tif",
+      "timeStart": "2000-06-21T00:00:00.000Z",
+      "dataUrl": "https://data.gesdisc.earthdata.nasa.gov/data/Landslide/Global_Landslide_Nowcast.1.1/2000/Global_Landslide_Nowcast_v1.1_20000621.tif"
+    },
+    {
+      "conceptId": "G2041287936-GES_DISC",
+      "title": "Global_Landslide_Nowcast.1.1:Global_Landslide_Nowcast_v1.1_20000622.tif",
+      "timeStart": "2000-06-22T00:00:00.000Z",
+      "dataUrl": "https://data.gesdisc.earthdata.nasa.gov/data/Landslide/Global_Landslide_Nowcast.1.1/2000/Global_Landslide_Nowcast_v1.1_20000622.tif"
+    },
+    {
+      "conceptId": "G2041287939-GES_DISC",
+      "title": "Global_Landslide_Nowcast.1.1:Global_Landslide_Nowcast_v1.1_20000623.tif",
+      "timeStart": "2000-06-23T00:00:00.000Z",
+      "dataUrl": "https://data.gesdisc.earthdata.nasa.gov/data/Landslide/Global_Landslide_Nowcast.1.1/2000/Global_Landslide_Nowcast_v1.1_20000623.tif"
+    }
+  ]
+}

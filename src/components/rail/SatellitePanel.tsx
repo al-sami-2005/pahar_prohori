@@ -20,6 +20,12 @@ export function SatellitePanel() {
         {pairs.map((p) => (
           <li
             key={`${p.site}-${p.track}-${p.product}-${p.after}`}
+            title={
+              p.afterGranuleTitle
+                ? `${p.afterGranuleTitle}${p.granuleSizeMb ? ` (${p.granuleSizeMb} MB)` : ''}`
+                : p.beforeGranuleTitle
+            }
+            data-granule-id={p.afterGranuleId ?? p.beforeGranuleId}
             className={cn(
               'grid grid-cols-[1fr_auto] gap-x-3 border-t border-hairline py-2 first:border-t-0',
               p.site !== state.site && 'opacity-55',
