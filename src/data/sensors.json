@@ -1,0 +1,123 @@
+{
+ "meta": {
+  "generator": "scripts/generate_demo_data.py",
+  "seed": 20261113,
+  "provenance": "simulated"
+ },
+ "nodes": [
+  {
+   "id": "NODE-01",
+   "slopeId": "CTG-S01",
+   "coordinates": [
+    91.791117,
+    22.37143
+   ],
+   "batteryPct": 91,
+   "link": "good",
+   "rssi": -88,
+   "lastSeenSec": 6,
+   "rest": {
+    "rainRate": 1.4,
+    "rain24h": 31.0,
+    "soilTop": 52,
+    "soilDeep": 44,
+    "tiltDelta": 0.01
+   }
+  },
+  {
+   "id": "NODE-02",
+   "slopeId": "CTG-S07",
+   "coordinates": [
+    91.807535,
+    22.36033
+   ],
+   "batteryPct": 78,
+   "link": "good",
+   "rssi": -94,
+   "lastSeenSec": 11,
+   "rest": {
+    "rainRate": 1.8,
+    "rain24h": 34.5,
+    "soilTop": 55,
+    "soilDeep": 47,
+    "tiltDelta": 0.0
+   }
+  },
+  {
+   "id": "NODE-03",
+   "slopeId": "CTG-S03",
+   "coordinates": [
+    91.815871,
+    22.347018
+   ],
+   "batteryPct": 86,
+   "link": "good",
+   "rssi": -97,
+   "lastSeenSec": 8,
+   "rest": {
+    "rainRate": 2.1,
+    "rain24h": 38.2,
+    "soilTop": 58,
+    "soilDeep": 49,
+    "tiltDelta": 0.01
+   }
+  },
+  {
+   "id": "NODE-04",
+   "slopeId": "CTG-S23",
+   "coordinates": [
+    91.76074,
+    22.428844
+   ],
+   "batteryPct": 64,
+   "link": "fair",
+   "rssi": -109,
+   "lastSeenSec": 14,
+   "rest": {
+    "rainRate": 1.2,
+    "rain24h": 27.6,
+    "soilTop": 49,
+    "soilDeep": 41,
+    "tiltDelta": 0.02
+   }
+  },
+  {
+   "id": "NODE-05",
+   "slopeId": "UKH-S02",
+   "coordinates": [
+    92.162079,
+    21.21595
+   ],
+   "batteryPct": 82,
+   "link": "good",
+   "rssi": -91,
+   "lastSeenSec": 9,
+   "rest": {
+    "rainRate": 0.9,
+    "rain24h": 22.4,
+    "soilTop": 46,
+    "soilDeep": 40,
+    "tiltDelta": 0.0
+   }
+  },
+  {
+   "id": "NODE-06",
+   "slopeId": "UKH-S10",
+   "coordinates": [
+    92.153887,
+    21.187339
+   ],
+   "batteryPct": 71,
+   "link": "fair",
+   "rssi": -104,
+   "lastSeenSec": 17,
+   "rest": {
+    "rainRate": 1.1,
+    "rain24h": 24.8,
+    "soilTop": 48,
+    "soilDeep": 42,
+    "tiltDelta": 0.01
+   }
+  }
+ ]
+}

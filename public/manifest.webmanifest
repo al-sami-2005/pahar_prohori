@@ -1,0 +1,12 @@
+{
+  "name": "Pahar Prohori — Landslide Intelligence",
+  "short_name": "Pahar Prohori",
+  "description": "Space-to-ground landslide intelligence and early-warning prototype for Bangladesh.",
+  "start_url": "./#/",
+  "display": "standalone",
+  "background_color": "#f7f6f1",
+  "theme_color": "#f7f6f1",
+  "icons": [
+    { "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

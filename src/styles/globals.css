@@ -1,0 +1,181 @@
+@import 'tailwindcss';
+@import './tokens.css';
+@import 'maplibre-gl/dist/maplibre-gl.css';
+@import './map.css';
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  html {
+    color-scheme: light;
+    background-color: var(--color-canvas);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-canvas);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Bengali glyphs come from the font stack fallback; paragraphs need taller line boxes
+     for matras and conjuncts. */
+  :lang(bn) {
+    letter-spacing: 0;
+  }
+
+  p:lang(bn) {
+    line-height: 1.6;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-accent) 30%, transparent);
+    color: var(--color-fg);
+  }
+
+  /* One consistent, always-visible keyboard focus ring. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  button,
+  [role='button'],
+  [role='switch'],
+  [role='radio'] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
+  /* Thin, quiet scrollbars for panels. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+}
+
+@layer utilities {
+  /* Mono eyebrow label used for telemetry, IDs and provenance. */
+  .label-micro {
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    line-height: var(--text-micro--line-height);
+    letter-spacing: var(--text-micro--letter-spacing);
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* Numeric telemetry: fixed-width digits so values don't jitter while updating. */
+  .numeric {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums slashed-zero;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Respect reduced-motion everywhere, including CSS keyframes and transitions. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Replay scrubber — native range input, restyled (keeps keyboard + screen-reader support). */
+.replay-range {
+  appearance: none;
+  height: 28px;
+  background: transparent;
+  cursor: pointer;
+}
+.replay-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgb(33 48 42 / 0.13);
+}
+.replay-range::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgb(33 48 42 / 0.13);
+}
+.replay-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -8px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 4px var(--color-surface), 0 2px 8px rgb(33 48 42 / 0.16);
+}
+.replay-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 4px var(--color-surface), 0 2px 8px rgb(33 48 42 / 0.16);
+}
+.replay-range:focus-visible {
+  outline: none;
+}
+/* Keyboard focus rings the thumb (the playhead) rather than the whole track. */
+.replay-range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px var(--color-surface), 0 0 0 5px var(--color-accent), 0 2px 8px rgb(33 48 42 / 0.16);
+}
+.replay-range:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 3px var(--color-surface), 0 0 0 5px var(--color-accent), 0 2px 8px rgb(33 48 42 / 0.16);
+}
+
+/* Replay: one-off pulse when playback crosses the backtest cutoff. */
+.cutoff-pulse {
+  pointer-events: none;
+  animation: cutoff-pulse 900ms var(--ease-out) 1 both;
+}
+@keyframes cutoff-pulse {
+  from {
+    box-shadow: 0 0 0 0 rgb(33 108 89 / 0.34);
+  }
+  to {
+    box-shadow: 0 0 0 10px rgb(33 108 89 / 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cutoff-pulse {
+    animation: none;
+  }
+}
+
+/* Replay story caption: fade in on each new moment (no exit phase to get stuck in). */
+.caption-in {
+  animation: caption-in 220ms var(--ease-out) both;
+}
+@keyframes caption-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .caption-in {
+    animation: none;
+  }
+}

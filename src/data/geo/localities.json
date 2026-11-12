@@ -1,0 +1,110 @@
+[
+ {
+  "name": "Foy's Lake",
+  "site": "chattogram",
+  "lon": 91.7918,
+  "lat": 22.3702
+ },
+ {
+  "name": "Batali Hill",
+  "site": "chattogram",
+  "lon": 91.816,
+  "lat": 22.347
+ },
+ {
+  "name": "Motijharna",
+  "site": "chattogram",
+  "lon": 91.823,
+  "lat": 22.3446
+ },
+ {
+  "name": "Khulshi Hills",
+  "site": "chattogram",
+  "lon": 91.8066,
+  "lat": 22.3607
+ },
+ {
+  "name": "Akbar Shah",
+  "site": "chattogram",
+  "lon": 91.7727,
+  "lat": 22.3792
+ },
+ {
+  "name": "Lebubagan",
+  "site": "chattogram",
+  "lon": 91.7832,
+  "lat": 22.385
+ },
+ {
+  "name": "Shere Shah",
+  "site": "chattogram",
+  "lon": 91.7985,
+  "lat": 22.3962
+ },
+ {
+  "name": "Jalalabad",
+  "site": "chattogram",
+  "lon": 91.8098,
+  "lat": 22.4035
+ },
+ {
+  "name": "Jangal Salimpur",
+  "site": "chattogram",
+  "lon": 91.7648,
+  "lat": 22.4262
+ },
+ {
+  "name": "Kutupalong",
+  "site": "ukhiya-teknaf",
+  "lon": 92.1585,
+  "lat": 21.214
+ },
+ {
+  "name": "Lambashia",
+  "site": "ukhiya-teknaf",
+  "lon": 92.1498,
+  "lat": 21.2035
+ },
+ {
+  "name": "Balukhali",
+  "site": "ukhiya-teknaf",
+  "lon": 92.157,
+  "lat": 21.1885
+ },
+ {
+  "name": "Jamtoli",
+  "site": "ukhiya-teknaf",
+  "lon": 92.1472,
+  "lat": 21.1732
+ },
+ {
+  "name": "Thaingkhali",
+  "site": "ukhiya-teknaf",
+  "lon": 92.154,
+  "lat": 21.1605
+ },
+ {
+  "name": "Hakimpara",
+  "site": "ukhiya-teknaf",
+  "lon": 92.1612,
+  "lat": 21.1472
+ },
+ {
+  "name": "Shamlapur",
+  "site": "ukhiya-teknaf",
+  "lon": 92.164,
+  "lat": 21.047
+ },
+ {
+  "name": "Leda",
+  "site": "ukhiya-teknaf",
+  "lon": 92.2172,
+  "lat": 21.008
+ },
+ {
+  "name": "Nayapara",
+  "site": "ukhiya-teknaf",
+  "lon": 92.2262,
+  "lat": 20.9602
+ }
+]

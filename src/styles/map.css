@@ -1,0 +1,323 @@
+/*
+ * Map-surface styles: DOM markers (ground nodes, place labels) and MapLibre
+ * control overrides. Kept separate so component files stay about behaviour.
+ */
+
+/* ---------- MapLibre chrome ---------- */
+.maplibregl-map {
+  font-family: var(--font-sans);
+  background: var(--color-sea);
+}
+
+.maplibregl-canvas:focus-visible {
+  outline: none;
+}
+
+.maplibregl-ctrl-attrib.maplibregl-compact,
+.maplibregl-ctrl-attrib {
+  background: transparent !important;
+  color: var(--color-faint);
+  font-size: 10px;
+  line-height: 14px;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: var(--color-muted);
+}
+
+.maplibregl-ctrl-attrib-button {
+  display: none !important;
+}
+
+/* ---------- Ground node marker ---------- */
+.node-marker {
+  /* No `position` here: MapLibre's .maplibregl-marker is absolutely positioned. */
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  /* MapLibre writes inline `opacity` on markers, so our states use filter: opacity(). */
+  transition: filter var(--duration-layer) var(--ease-out);
+}
+
+.node-marker__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--color-healthy);
+  box-shadow:
+    0 0 0 2px var(--color-canvas),
+    0 0 0 3px rgb(42 122 90 / 0.32);
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.node-marker__beat {
+  position: absolute;
+  inset: 6.5px;
+  border-radius: 999px;
+  border: 1px solid var(--color-healthy);
+  animation: var(--animate-heartbeat);
+  pointer-events: none;
+}
+
+.node-marker__label {
+  position: absolute;
+  left: 22px;
+  top: 50%;
+  transform: translate(-4px, -50%);
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1;
+  color: var(--color-fg);
+  text-shadow:
+    0 0 3px rgb(255 255 255 / 0.96),
+    0 1px 2px rgb(255 255 255 / 0.96);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.node-marker__label span {
+  color: var(--color-muted);
+  margin-left: 6px;
+}
+
+.node-marker:hover .node-marker__dot,
+.node-marker:focus-visible .node-marker__dot,
+.node-marker[data-selected='true'] .node-marker__dot {
+  transform: scale(1.25);
+  box-shadow:
+    0 0 0 2px var(--color-canvas),
+    0 0 0 4px rgb(42 122 90 / 0.42);
+}
+
+.node-marker:hover .node-marker__label,
+.node-marker:focus-visible .node-marker__label,
+.node-marker[data-selected='true'] .node-marker__label,
+.node-marker[data-emphasis='true'] .node-marker__label {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+.node-marker:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.node-marker[data-dim='true'] {
+  filter: opacity(0.18);
+}
+
+.node-marker[data-link='fair'] .node-marker__dot {
+  box-shadow:
+    0 0 0 2px var(--color-canvas),
+    0 0 0 3px rgb(42 122 90 / 0.20);
+}
+
+.node-marker[data-live='true'] .node-marker__label span {
+  display: none;
+}
+
+/* Alert state on the node follows the scenario (text/icon live in the drawer and bar). */
+.node-marker[data-alert='watch'] .node-marker__dot {
+  background: var(--color-watch);
+}
+.node-marker[data-alert='warning'] .node-marker__dot {
+  background: var(--color-warning);
+}
+.node-marker[data-alert='evacuate'] .node-marker__dot {
+  background: var(--color-evacuate);
+}
+.node-marker[data-alert='watch'] .node-marker__beat {
+  border-color: var(--color-watch);
+}
+.node-marker[data-alert='warning'] .node-marker__beat {
+  border-color: var(--color-warning);
+}
+.node-marker[data-alert='evacuate'] .node-marker__beat {
+  border-color: var(--color-evacuate);
+  border-width: 1.5px;
+}
+.node-marker[data-alert='evacuate'][data-selected='true'] .node-marker__dot {
+  box-shadow:
+    0 0 0 2px var(--color-canvas),
+    0 0 0 4px rgb(190 67 83 / 0.42);
+}
+.node-marker[data-alert='warning'][data-selected='true'] .node-marker__dot {
+  box-shadow:
+    0 0 0 2px var(--color-canvas),
+    0 0 0 4px rgb(180 90 42 / 0.42);
+}
+
+/* ---------- Place labels ---------- */
+.place-label {
+  pointer-events: none;
+  white-space: nowrap;
+  color: var(--color-muted);
+  font-size: 11.5px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-shadow:
+    0 0 4px rgb(255 255 255 / 0.95),
+    0 1px 2px rgb(255 255 255 / 0.95);
+  transition: filter var(--duration-layer) var(--ease-out);
+}
+
+.place-label[data-kind='region'] {
+  color: rgb(33 48 42 / 0.78);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.place-label[data-kind='admin'] {
+  color: rgb(94 111 102 / 0.78);
+}
+
+.place-label[data-kind='locality'] {
+  color: rgb(33 48 42 / 0.92);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.place-label[data-kind='water'] {
+  color: rgb(43 120 153 / 0.76);
+  font-style: italic;
+  letter-spacing: 0.04em;
+}
+
+.place-label[data-kind='country'] {
+  color: rgb(94 111 102 / 0.62);
+  font-size: 10.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.place-label[data-hidden='true'] {
+  filter: opacity(0);
+}
+
+.map-quiet .place-label {
+  filter: opacity(0.25);
+}
+
+.map-quiet .place-label[data-hidden='true'] {
+  filter: opacity(0);
+}
+
+@keyframes loading-sweep {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+/* A planned slope's own node marker gives way to its numbered plan marker. */
+.node-marker[data-planned='true'] {
+  filter: opacity(0);
+  pointer-events: none;
+}
+[data-view='deploy'] .node-marker:not([data-planned='true']) .node-marker__beat {
+  animation: none;
+  opacity: 0;
+}
+
+/* ---------- Deployment planner: numbered node markers ---------- */
+/* Proposed = mint outline, existing simulated demo node = solid mint. The number is the
+   priority position and matches the list row. MapLibre owns the button's transform and
+   opacity, so all visual states live on the inner body (or use filter). */
+.deploy-marker {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  transition: filter 160ms var(--ease-out);
+}
+.deploy-marker__body {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-healthy);
+  background: rgb(255 255 255 / 0.96);
+  color: var(--color-healthy);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.92), 0 2px 8px rgb(33 48 42 / 0.18);
+  transition:
+    transform 160ms var(--ease-out),
+    box-shadow 160ms var(--ease-out),
+    background-color 160ms var(--ease-out);
+}
+.deploy-marker[data-status='existing'] .deploy-marker__body {
+  background: var(--color-healthy);
+  color: var(--color-canvas);
+}
+.deploy-marker:hover .deploy-marker__body,
+.deploy-marker:focus-visible .deploy-marker__body,
+.deploy-marker[data-active='true'] .deploy-marker__body {
+  transform: scale(1.18);
+  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px rgb(42 122 90 / 0.34), 0 2px 8px rgb(33 48 42 / 0.18);
+}
+.deploy-marker[data-selected='true'] .deploy-marker__body {
+  box-shadow: 0 0 0 2px var(--color-canvas), 0 0 0 4px var(--color-accent);
+}
+.deploy-marker:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+/* Lower priorities step aside when they would overlap a higher one; the active marker stays. */
+.deploy-marker[data-hidden='true'] {
+  filter: opacity(0);
+  pointer-events: none;
+}
+.deploy-marker[data-phase='enter'] .deploy-marker__body {
+  animation: deploy-enter 220ms var(--ease-out) both;
+}
+.deploy-marker[data-phase='leave'] {
+  pointer-events: none;
+}
+.deploy-marker[data-phase='leave'] .deploy-marker__body {
+  animation: deploy-leave 160ms var(--ease-out) both;
+}
+@keyframes deploy-enter {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes deploy-leave {
+  to {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .deploy-marker[data-phase] .deploy-marker__body {
+    animation: none;
+  }
+}

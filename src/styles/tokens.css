@@ -1,0 +1,117 @@
+/*
+ * Pahar Prohori — natural cartographic design tokens.
+ * The visual direction is deliberately familiar: warm paper-like surfaces,
+ * soft map geography, forest/sky accents, and restrained semantic colours.
+ * Scientific meaning is unchanged; this file only changes presentation.
+ */
+
+@theme {
+  --color-*: initial;
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* Warm, natural surfaces — less dashboard, more modern map atlas. */
+  --color-canvas: #f7f6f1;
+  --color-surface: #ffffff;
+  --color-elevated: #f1f4ef;
+  --color-raised: #e5ece6;
+
+  /* High-contrast pine typography. */
+  --color-fg: #21302a;
+  --color-muted: #5e6f66;
+  --color-faint: #7f8f86;
+
+  --color-line: rgb(34 67 54 / 0.12);
+  --color-line-strong: rgb(34 67 54 / 0.22);
+  --color-hairline: rgb(34 67 54 / 0.08);
+
+  --color-overlay: rgb(255 255 255 / 0.965);
+  --color-sea: #dceef0;
+
+  /* Thesis layers — muted nature-derived hues, all readable on white. */
+  --color-satellite: #2b7899; /* sky / SPACE */
+  --color-ai: #77658f; /* muted plum / AI */
+  --color-healthy: #2a7a5a; /* forest / GROUND */
+  --color-accent: #216c59; /* primary action / selection */
+
+  /* Human action */
+  --color-watch: #8d6a18;
+  --color-warning: #b45a2a;
+  --color-evacuate: #be4353;
+
+  /* Relative-risk ramp — soft neutral-to-plum, never alert-like. */
+  --color-risk-low: #e7e5df;
+  --color-risk-moderate: #d7cedc;
+  --color-risk-high: #a996b7;
+  --color-risk-critical: #735d85;
+
+  --font-sans: 'Geist Variable', 'Noto Sans Bengali Variable', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-bn: 'Noto Sans Bengali Variable', 'Geist Variable', ui-sans-serif, sans-serif;
+
+  --text-2xs: 0.71875rem;
+  --text-2xs--line-height: 1rem;
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 0.875rem;
+  --text-micro--letter-spacing: 0.08em;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.3rem;
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.45rem;
+  --text-md: 1rem;
+  --text-md--line-height: 1.5rem;
+  --text-lg: 1.0625rem;
+  --text-lg--line-height: 1.55rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --text-title: 1.625rem;
+  --text-title--line-height: 2rem;
+  --text-3xl: 2rem;
+  --text-3xl--line-height: 2.375rem;
+  --text-4xl: 2.75rem;
+  --text-4xl--line-height: 3rem;
+
+  /* Gentle map-product geometry. */
+  --radius-xs: 5px;
+  --radius-sm: 7px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-panel: 18px;
+
+  /* Soft elevation, no “dashboard” outline glow. */
+  --shadow-panel: 0 1px 2px rgb(31 48 40 / 0.06), 0 8px 24px -14px rgb(31 48 40 / 0.18);
+  --shadow-float: 0 2px 8px rgb(31 48 40 / 0.08), 0 14px 34px -18px rgb(31 48 40 / 0.24);
+  --shadow-overlay: 0 4px 14px rgb(31 48 40 / 0.09), 0 22px 50px -24px rgb(31 48 40 / 0.28);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 160ms;
+  --duration-panel: 220ms;
+  --duration-layer: 320ms;
+
+  --animate-sensor-pulse: sensor-pulse 2.8s var(--ease-out) infinite;
+  --animate-heartbeat: heartbeat 2.8s var(--ease-out) infinite;
+  --animate-evacuate-breathe: evacuate-breathe 2s var(--ease-in-out) infinite;
+
+  @keyframes sensor-pulse {
+    0% { transform: scale(1); opacity: 0.5; }
+    70%, 100% { transform: scale(2.45); opacity: 0; }
+  }
+
+  @keyframes heartbeat {
+    0% { transform: scale(1); opacity: 0.3; }
+    60%, 100% { transform: scale(2.3); opacity: 0; }
+  }
+
+  @keyframes evacuate-breathe {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(190 67 83 / 0); }
+    50% { box-shadow: 0 0 0 4px rgb(190 67 83 / 0.15); }
+  }
+}
