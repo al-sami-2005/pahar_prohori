@@ -10,9 +10,6 @@ venv/
 __pycache__/
 *.py[cod]
 *.egg-info/
-*.db
-*.sqlite
-*.sqlite3
 
 # Node / Expo / Web build
 node_modules/
