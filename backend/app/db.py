@@ -25,21 +25,30 @@ def init_db():
         hill_id INTEGER PRIMARY KEY, nisar_date TEXT, nisar_soil_moisture REAL,
         los_velocity_mm_month REAL, coherence REAL
     );
-    CREATE TABLE IF NOT EXISTS sensor_readings (
+    DROP TABLE IF EXISTS sensor_readings;
+    CREATE TABLE sensor_readings (
         id INTEGER PRIMARY KEY AUTOINCREMENT, hill_id INTEGER, device_id TEXT,
         ts TEXT, wind_speed REAL, humidity REAL, temperature REAL,
-        soil_moisture REAL, acceleration REAL
+        soil_moisture REAL, acceleration REAL, rainfall_mm REAL
     );
     CREATE INDEX IF NOT EXISTS idx_readings_hill ON sensor_readings(hill_id, id);
     CREATE TABLE IF NOT EXISTS risk_status (
         hill_id INTEGER PRIMARY KEY, probability REAL, level TEXT,
-        reasons TEXT, verified INTEGER, danger_until TEXT, updated_at TEXT
+        reasons TEXT, verified INTEGER, danger_until TEXT, updated_at TEXT,
+        rain_mm REAL
     );
     CREATE TABLE IF NOT EXISTS alerts (
         id INTEGER PRIMARY KEY AUTOINCREMENT, hill_id INTEGER, level TEXT,
         probability REAL, message_bn TEXT, message_en TEXT, created_at TEXT
     );
     """)
+    # Fresh risk after archive reload (drop stale 24h DANGER holds)
+    c.execute("DELETE FROM risk_status")
+    c.execute("DELETE FROM alerts")
+    cols = {r[1] for r in c.execute("PRAGMA table_info(risk_status)")}
+    if "rain_mm" not in cols:
+        c.execute("ALTER TABLE risk_status ADD COLUMN rain_mm REAL")
+
     hills = pd.read_csv("data/hills.csv")
     for _, h in hills.iterrows():
         c.execute("INSERT OR REPLACE INTO hills VALUES (?,?,?,?,?,?,?)",
@@ -59,19 +68,20 @@ def _load_field_archive(c):
     """Replace sensor_readings with the 7-day field archive (source of truth)."""
     if not FIELD_ARCHIVE.exists():
         return
-    df = pd.read_csv(FIELD_ARCHIVE)[
-        ["hill_id", "device_id", "ts", "wind_speed", "humidity",
-         "temperature", "soil_moisture", "acceleration"]
-    ]
+    df = pd.read_csv(FIELD_ARCHIVE)
+    if "rainfall_mm" not in df.columns:
+        df["rainfall_mm"] = 0.0
+    df = df[["hill_id", "device_id", "ts", "wind_speed", "humidity",
+             "temperature", "soil_moisture", "acceleration", "rainfall_mm"]]
     c.execute("DELETE FROM sensor_readings")
     rows = [
         (int(hill_id), device_id, ts, float(wind), float(hum),
-         float(temp), float(sm), float(acc))
-        for hill_id, device_id, ts, wind, hum, temp, sm, acc
+         float(temp), float(sm), float(acc), float(rain))
+        for hill_id, device_id, ts, wind, hum, temp, sm, acc, rain
         in df.itertuples(index=False, name=None)
     ]
     c.executemany(
         "INSERT INTO sensor_readings (hill_id, device_id, ts, wind_speed, humidity, "
-        "temperature, soil_moisture, acceleration) VALUES (?,?,?,?,?,?,?,?)",
+        "temperature, soil_moisture, acceleration, rainfall_mm) VALUES (?,?,?,?,?,?,?,?,?)",
         rows,
     )

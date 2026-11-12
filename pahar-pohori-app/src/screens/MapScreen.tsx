@@ -2,7 +2,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomSheet, type Snap } from '../components/BottomSheet';
 import { LayerSheet, ReplayBar } from '../components/MapControls';
@@ -60,7 +60,10 @@ export default function MapScreen() {
     setReplayLoading(true);
     const tl = await loadTimeline();
     setReplayLoading(false);
-    if (!tl || !tl.times.length) return;
+    if (!tl || !tl.times.length) {
+      Alert.alert(t('replay'), t('replayUnavailable'));
+      return;
+    }
     setSel(null); setTimeline(tl); setTIndex(0); setPlaying(true);
     setFocus({ lat: 22.55, lon: 92.15, zoom: 9, key: Date.now() });
   };
@@ -120,7 +123,8 @@ export default function MapScreen() {
     const from = location ?? (selHill ? { lat: selHill.lat, lon: selHill.lon } : await requestLocation());
     const target = from ?? { lat: hills[0]?.lat ?? 22.6, lon: hills[0]?.lon ?? 92.2 };
     const s = selShelter ?? nearestShelters(target.lat, target.lon, shelters, 1)[0];
-    if (s) nav.navigate('Route', { shelterId: s.shelter_id, fromHillId: !location && selHill ? selHill.hill_id : undefined });
+    if (!s) { Alert.alert(t('tabShelters'), t('noShelterNearby')); return; }
+    nav.navigate('Route', { shelterId: s.shelter_id, fromHillId: !location && selHill ? selHill.hill_id : undefined });
   };
   const toggleLevel = (l: Level) => setLevelFilter((cur) => (cur === l ? null : l));
 
@@ -159,7 +163,7 @@ export default function MapScreen() {
       {chip('s', t('SAFE'), 'shield-checkmark', levelFilter === 'SAFE', () => toggleLevel('SAFE'), statusColor.SAFE, summary.counts.SAFE)}
       {chip('sh', t('tabShelters'), 'home', settings.showShelters, () => updateSettings({ showShelters: !settings.showShelters }), c.info)}
       {chip('rp', t('reportsLayer'), 'megaphone', settings.showReports, () => updateSettings({ showReports: !settings.showReports }), c.watch)}
-      {chip('rain', t('layerSoil'), 'water', settings.layer === 'soil', () => updateSettings({ layer: settings.layer === 'soil' ? 'risk' : 'soil' }))}
+      {chip('soil', t('layerSoil'), 'water', settings.layer === 'soil', () => updateSettings({ layer: settings.layer === 'soil' ? 'risk' : 'soil' }))}
       {chip('creep', 'NISAR', 'planet', settings.layer === 'creep', () => updateSettings({ layer: settings.layer === 'creep' ? 'risk' : 'creep' }))}
       {chip('rep', t('replay'), 'time', replay, replay ? closeReplay : openReplay)}
       {chip('sv', lang === 'bn' ? 'সংরক্ষিত' : 'Saved', 'bookmark', savedOpen, () => { setSavedOpen((v) => !v); setSel(null); setSnap(1); })}
@@ -169,7 +173,7 @@ export default function MapScreen() {
 
   const onlineNodes = hills.filter((h) => h.latest_reading).length;
   const livePill = (
-    <Pressable onPress={() => nav.navigate('AboutModel')} accessibilityRole="button" accessibilityLabel="Live system"
+    <Pressable onPress={() => nav.navigate('AboutModel')} accessibilityRole="button" accessibilityLabel={t('moreModel')}
       style={[{ flexDirection: 'row', alignItems: 'center', gap: 7, height: 34, paddingHorizontal: 12, borderRadius: 17, backgroundColor: c.elevated }, shadowSoft]}>
       <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: source === 'live' ? c.safe : source === 'cache' ? c.watch : c.info }} />
       <Text style={{ color: c.ink, fontWeight: '700', fontSize: 12 }}>
@@ -208,6 +212,7 @@ export default function MapScreen() {
     : selShelter ? <ShelterPlace shelter={selShelter} onClose={() => { setSel(null); setSnap(0); }} onPickHill={(h) => selectHill(h.hill_id)} />
     : sel?.kind === 'place' ? <GeoPlace place={sel.place} onClose={() => { setSel(null); setSnap(0); }} onPickHill={(h) => selectHill(h.hill_id)} />
     : <ExploreContent onPickHill={(h) => selectHill(h.hill_id)} onReplay={openReplay} savedOpen={savedOpen}
+        onFilterLevel={toggleLevel}
         onSaved={(s) => {
           const [kind, id] = s.key.split(':');
           if (kind === 'hill') selectHill(Number(id));

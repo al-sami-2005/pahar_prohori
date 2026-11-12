@@ -128,7 +128,7 @@ function describe(st: OsrmStep, lang: Lang): string {
   if (type === 'roundabout' || type === 'rotary') return bn ? 'গোলচত্বরে ঢুকুন' : 'Enter the roundabout';
   const verb = (bn ? MOD_BN : MOD_EN)[modifier ?? 'straight'] ?? (bn ? 'চলুন' : 'Continue');
   if (!name) return verb;
-  return bn ? `${verb} — ${name}` : `${verb} onto ${name}`;
+  return bn ? `${verb} ${name}` : `${verb} onto ${name}`;
 }
 
 /** MaterialCommunityIcons name for a maneuver arrow. */

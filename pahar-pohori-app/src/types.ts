@@ -1,4 +1,4 @@
-/** Shapes returned by the FastAPI backend (landslide-backend-for-frontend). */
+/** Shapes returned by the FastAPI backend (`../backend`). */
 
 export type Level = 'SAFE' | 'WATCH' | 'DANGER' | 'NO_DATA';
 
@@ -9,6 +9,8 @@ export interface HillStatus {
   verified_by_nisar: boolean;
   danger_until: string | null;
   updated_at: string | null;
+  /** Sensor rainfall summed over the model window (~5 h). */
+  rain_mm_5h?: number | null;
 }
 
 export interface Reading {
@@ -21,6 +23,7 @@ export interface Reading {
   temperature: number;
   soil_moisture: number;
   acceleration: number;
+  rainfall_mm?: number;
 }
 
 export interface Hill {
@@ -211,7 +214,7 @@ export interface SystemStatus {
   intervals: { sensor_s: number; model_s: number };
   readings: { total: number; since_start: number; real_packets: number; per_min: number; archive_start: string | null };
   model: {
-    type: string; trees: number | null; features: number; window_readings: number;
+    type: string; trees: number | null; features: number; window_readings: number; window_hours?: number;
     danger_threshold: number; watch_threshold: number; runs: number; hill_scores: number;
     last_ms: number | null; avg_ms: number | null; last_run_at: string | null;
   };

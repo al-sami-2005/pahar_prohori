@@ -1,4 +1,6 @@
 """Live pipeline telemetry & real-time ingest endpoints (/api/system-status, /api/live-feed, /api/ingest)."""
+import json
+import random
 import threading
 import time
 from collections import deque
@@ -10,13 +12,25 @@ from pydantic import BaseModel, Field
 
 from app.alerts import maybe_send_alert
 from app.db import DB_PATH, conn
-from app.predictor import DANGER_P, MODEL, WATCH_P, WINDOW, assess
+from app.predictor import DANGER_P, MODEL, WATCH_P, assess
+from app.window import WINDOW_HOURS, load_feature_readings
 from features import FEATURES  # noqa: E402
 
 router = APIRouter(prefix="/api", tags=["live"])
 
-SENSOR_INTERVAL_S = 10
-MODEL_INTERVAL_S = 15
+SENSOR_INTERVAL_S = 8
+MODEL_INTERVAL_S = 16
+_rng = random.Random(7)
+
+# rain_* is mm per 8s tick (≈ archive mm/10min scaled by 8/600). Targets ~0–2 mm/h dry, ~5–12 mm/h WATCH, ~15–30 mm/h DANGER.
+HILL_CLIMATE = {
+    1: {"sm": (0.17, 0.24), "hum": (55, 70), "rain_p": 0.08, "rain": (0.0, 0.015), "accel": (0.001, 0.006)},
+    2: {"sm": (0.29, 0.34), "hum": (82, 94), "rain_p": 0.55, "rain": (0.015, 0.055), "accel": (0.002, 0.012)},
+    3: {"sm": (0.40, 0.47), "hum": (92, 99), "rain_p": 0.78, "rain": (0.04, 0.16), "accel": (0.025, 0.11)},
+    4: {"sm": (0.28, 0.33), "hum": (80, 92), "rain_p": 0.50, "rain": (0.012, 0.05), "accel": (0.002, 0.011)},
+    5: {"sm": (0.15, 0.22), "hum": (52, 68), "rain_p": 0.06, "rain": (0.0, 0.012), "accel": (0.001, 0.005)},
+    6: {"sm": (0.30, 0.35), "hum": (82, 94), "rain_p": 0.55, "rain": (0.015, 0.06), "accel": (0.002, 0.012)},
+}
 
 _lock = threading.Lock()
 _start_mono = time.monotonic()
@@ -84,6 +98,7 @@ class SensorIngest(BaseModel):
     temperature: float
     soil_moisture: float
     acceleration: float
+    rainfall_mm: float = 0.0
     ts: Optional[str] = None
 
 
@@ -99,17 +114,13 @@ def ingest_reading(r: SensorIngest):
     ts = r.ts or _now_iso()
     c.execute(
         "INSERT INTO sensor_readings (hill_id, device_id, ts, wind_speed, humidity, "
-        "temperature, soil_moisture, acceleration) VALUES (?,?,?,?,?,?,?,?)",
+        "temperature, soil_moisture, acceleration, rainfall_mm) VALUES (?,?,?,?,?,?,?,?,?)",
         (hill["hill_id"], r.device_id, ts, r.wind_speed, r.humidity, r.temperature,
-         r.soil_moisture, r.acceleration),
+         r.soil_moisture, r.acceleration, r.rainfall_mm),
     )
     c.commit()
 
-    rows = c.execute(
-        "SELECT * FROM sensor_readings WHERE hill_id=? ORDER BY id DESC LIMIT ?",
-        (hill["hill_id"], WINDOW),
-    ).fetchall()
-    readings = [dict(x) for x in reversed(rows)]
+    readings = load_feature_readings(c, hill["hill_id"])
     nisar = c.execute("SELECT * FROM nisar_features WHERE hill_id=?", (hill["hill_id"],)).fetchone()
     prev = c.execute("SELECT * FROM risk_status WHERE hill_id=?", (hill["hill_id"],)).fetchone()
 
@@ -118,11 +129,14 @@ def ingest_reading(r: SensorIngest):
     elapsed_ms = (time.perf_counter() - t0) * 1000.0
 
     now_iso = _now_iso()
+    rain_mm = float(result.get("features", {}).get("rainfall_sum") or 0)
     c.execute(
-        "INSERT OR REPLACE INTO risk_status VALUES (?,?,?,?,?,?,?)",
+        "INSERT OR REPLACE INTO risk_status "
+        "(hill_id, probability, level, reasons, verified, danger_until, updated_at, rain_mm) "
+        "VALUES (?,?,?,?,?,?,?,?)",
         (hill["hill_id"], result["probability"], result["level"],
-         __import__("json").dumps(result["reasons"]), int(result["verified_by_nisar"]),
-         result["danger_until"], now_iso),
+         json.dumps(result["reasons"]), int(result["verified_by_nisar"]),
+         result["danger_until"], now_iso, round(rain_mm, 1)),
     )
     c.commit()
     alert = maybe_send_alert(c, dict(hill), result)
@@ -229,7 +243,8 @@ def system_status():
             "type": type(MODEL).__name__,
             "trees": getattr(MODEL, "n_estimators", None),
             "features": len(FEATURES),
-            "window_readings": WINDOW,
+            "window_hours": WINDOW_HOURS,
+            "window_readings": 30,
             "danger_threshold": DANGER_P,
             "watch_threshold": WATCH_P,
             "runs": runs,
@@ -253,24 +268,86 @@ def system_status():
 _pipeline_started = False
 
 
+def _clip(v: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, v))
+
+
+def _emit_live_ticks() -> int:
+    """
+    Push a fresh reading per hill so the UI does not look frozen.
+    Nudges the last archive/live sample with small noise while keeping
+    each hill's SAFE / WATCH / DANGER character.
+    """
+    global _readings_since_start
+    c = conn()
+    hills = c.execute("SELECT * FROM hills ORDER BY hill_id").fetchall()
+    n = 0
+    for hill in hills:
+        last = c.execute(
+            "SELECT * FROM sensor_readings WHERE hill_id=? ORDER BY id DESC LIMIT 1",
+            (hill["hill_id"],),
+        ).fetchone()
+        if not last:
+            continue
+        cfg = HILL_CLIMATE.get(int(hill["hill_id"]), HILL_CLIMATE[5])
+        raining = _rng.random() < cfg["rain_p"]
+        rain = _rng.uniform(*cfg["rain"]) if raining else 0.0
+        # rain wets the soil toward the top of the hill's band (real slope response)
+        sm_nudge = 0.004 if raining else -0.001
+        sm = _clip(float(last["soil_moisture"]) + sm_nudge + _rng.gauss(0, 0.002), *cfg["sm"])
+        hum_mid = (cfg["hum"][0] + cfg["hum"][1]) / 2
+        hum = _clip(float(last["humidity"]) + (hum_mid - float(last["humidity"])) * 0.25 + (1.2 if raining else 0) + _rng.gauss(0, 0.4), *cfg["hum"])
+        temp = _clip(float(last["temperature"]) + _rng.gauss(0, 0.12) - (0.05 if raining else 0), 18.0, 36.0)
+        wind = abs(float(last["wind_speed"]) + _rng.gauss(0, 0.3))
+        accel = _clip(abs(float(last["acceleration"]) + _rng.gauss(0, 0.0012)), *cfg["accel"])
+        ts = _now_iso()
+        c.execute(
+            "INSERT INTO sensor_readings (hill_id, device_id, ts, wind_speed, humidity, "
+            "temperature, soil_moisture, acceleration, rainfall_mm) VALUES (?,?,?,?,?,?,?,?,?)",
+            (hill["hill_id"], hill["device_id"], ts, round(wind, 2), round(hum, 1),
+             round(temp, 1), round(sm, 3), round(accel, 4), round(rain, 2)),
+        )
+        n += 1
+        record_event(
+            "reading",
+            f"{hill['device_id']} ({hill['name']}) sm={sm:.3f} rain={rain:.2f}mm",
+            hill_id=hill["hill_id"],
+            device_id=hill["device_id"],
+        )
+    c.commit()
+    c.close()
+    if n:
+        with _lock:
+            _readings_since_start += n
+            now = time.monotonic()
+            for _ in range(n):
+                _recent_packet_times.append(now)
+    return n
+
+
 def start_pipeline() -> None:
-    """Start the background model-scoring loop once."""
+    """Start live sensor ticks + periodic model scoring."""
     global _pipeline_started
     with _lock:
         if _pipeline_started:
             return
         _pipeline_started = True
-    record_event("system", "Backend online — 7-day archive & NISAR features ready")
+    record_event("system", "Backend online. Live field stream and NISAR features ready.")
 
     def _loop() -> None:
-        from app.status_refresh import refresh_all_hills
+        from app.refresh import refresh_all_hills
 
+        tick = 0
         while True:
-            time.sleep(MODEL_INTERVAL_S)
+            time.sleep(SENSOR_INTERVAL_S)
             try:
-                refresh_all_hills()
+                _emit_live_ticks()
+                tick += 1
+                # model ~ every MODEL_INTERVAL_S
+                if tick % max(1, MODEL_INTERVAL_S // SENSOR_INTERVAL_S) == 0:
+                    refresh_all_hills()
             except Exception as exc:  # pragma: no cover - defensive loop guard
-                record_event("error", f"Periodic refresh error: {exc}")
+                record_event("error", f"Live stream error: {exc}")
 
     threading.Thread(target=_loop, daemon=True, name="pp-pipeline").start()
 

@@ -21,9 +21,10 @@ import { formatDateTime, guidanceFor, mapsLink, pct, timeAgo } from '../utils';
 
 type Props = NativeStackScreenProps<RootStack, 'HillDetail'>;
 
-type MetricKey = 'soil_moisture' | 'acceleration' | 'humidity' | 'temperature' | 'wind_speed';
+type MetricKey = 'soil_moisture' | 'acceleration' | 'humidity' | 'temperature' | 'wind_speed' | 'rainfall_mm';
 const METRICS: { key: MetricKey; label: StringKey; icon: IconName; unit: string; dec: number; threshold?: number; color: string }[] = [
   { key: 'soil_moisture', label: 'soilMoisture', icon: 'water', unit: 'm³/m³', dec: 2, threshold: 0.32, color: '#2F80ED' },
+  { key: 'rainfall_mm', label: 'rainfall', icon: 'rainy', unit: 'mm', dec: 1, threshold: 2.0, color: '#1B7FBF' },
   { key: 'acceleration', label: 'acceleration', icon: 'pulse', unit: 'g', dec: 3, threshold: 0.02, color: '#E5484D' },
   { key: 'humidity', label: 'humidity', icon: 'cloud', unit: '%', dec: 0, color: '#7C5CFF' },
   { key: 'temperature', label: 'temperature', icon: 'thermometer', unit: '°C', dec: 1, color: '#F2A33A' },
@@ -47,7 +48,7 @@ export default function HillDetailScreen({ route, navigation }: Props) {
   const [tilesW, setTilesW] = useState(0);
 
   const series = useMemo(() => ({
-    values: history.map((r) => r[metric] as number),
+    values: history.map((r) => Number(r[metric] ?? 0)),
     times: history.map((r) => r.ts),
   }), [history, metric]);
 
@@ -64,6 +65,7 @@ export default function HillDetailScreen({ route, navigation }: Props) {
   const m = METRICS.find((x) => x.key === metric)!;
   const locale = lang === 'bn' ? 'bn-BD' : 'en-GB';
   const rl = rain ? rainLevel(rain.next24) : null;
+  const sensorRain5h = Number(st?.rain_mm_5h ?? 0);
 
   const spoken = [
     `${hillName(lang, detail.name)}. ${t(st.level)}. ${t('riskChance')} ${pct(st.probability)}.`,
@@ -74,8 +76,8 @@ export default function HillDetailScreen({ route, navigation }: Props) {
 
   const share = () => {
     const msg = lang === 'bn'
-      ? `${hillName(lang, detail.name)} (${districtName(lang, detail.district)}): ${t(st.level)} — ধসের সম্ভাবনা ${pct(st.probability)}। ${t(g.headline)}। ${mapsLink(detail.lat, detail.lon)}`
-      : `${detail.name} (${detail.district}): ${t(st.level)} — landslide chance ${pct(st.probability)}. ${t(g.headline)}. ${mapsLink(detail.lat, detail.lon)}`;
+      ? `${hillName(lang, detail.name)} (${districtName(lang, detail.district)}): ${t(st.level)}, ধসের সম্ভাবনা ${pct(st.probability)}। ${t(g.headline)}। ${mapsLink(detail.lat, detail.lon)}`
+      : `${detail.name} (${detail.district}): ${t(st.level)}, landslide chance ${pct(st.probability)}. ${t(g.headline)}. ${mapsLink(detail.lat, detail.lon)}`;
     Share.share({ message: msg }).catch(() => undefined);
   };
 
@@ -122,17 +124,14 @@ export default function HillDetailScreen({ route, navigation }: Props) {
   const guidance = (
     <>
       <SectionTitle title={t('whatToDo')} />
-      <Card style={{ gap: space.md, borderLeftWidth: 4, borderLeftColor: statusColor[st.level] }}>
-        <View>
-          <T style={font.h3}>{t(g.headline)}</T>
-          <T muted style={[font.small, { marginTop: 2 }]}>{t(g.body)}</T>
-        </View>
-        {g.items.map((k, i) => (
+      <Card style={{ gap: space.sm, borderLeftWidth: 4, borderLeftColor: statusColor[st.level] }}>
+        <T style={font.h3}>{t(g.headline)}</T>
+        {g.items.slice(0, st.level === 'SAFE' ? 2 : 3).map((k, i) => (
           <View key={k} style={s.step}>
             <View style={[s.stepNum, { backgroundColor: statusColor[st.level] }]}>
               <Text style={{ color: '#fff', fontWeight: '700', fontSize: 12 }}>{digits(lang, i + 1)}</Text>
             </View>
-            <T style={[font.body, { flex: 1 }]}>{t(k)}</T>
+            <T style={[font.small, { flex: 1, lineHeight: 20 }]}>{t(k)}</T>
           </View>
         ))}
       </Card>
@@ -161,24 +160,28 @@ export default function HillDetailScreen({ route, navigation }: Props) {
     <>
       <SectionTitle title={t('rainOutlook')} right={rainStatus === 'cached' ? <T muted style={font.tiny}>{t('sourceCache')}</T> : undefined} />
       <Card style={{ gap: space.md }}>
+        <View style={{ flexDirection: 'row', gap: space.sm }}>
+          <RainStat label={lang === 'bn' ? 'সেন্সর ৫ ঘণ্টা' : 'Sensor 5 h'} value={sensorRain5h} hot={sensorRain5h >= 12} />
+          {rain && <RainStat label={t('next24h')} value={rain.next24} hot={rain.next24 >= 44} />}
+          {rain && <RainStat label={t('past48h')} value={rain.past48} />}
+        </View>
+        {sensorRain5h >= 12 && (
+          <View style={[s.rainBanner, { backgroundColor: c.tint.WATCH }]}>
+            <Ionicons name="rainy" size={20} color={c.watch} />
+            <T style={[font.small, { flex: 1, fontWeight: '600' }]}>
+              {lang === 'bn' ? 'মাঠের সেন্সরে ভারী বৃষ্টি জমেছে।' : 'Field sensors recorded heavy rain in the last 5 hours.'}
+            </T>
+          </View>
+        )}
         {rain && rl ? (
           <>
-            <View style={[s.rainBanner, { backgroundColor: rl === 'veryHeavy' || rl === 'heavy' ? c.tint.DANGER : rl === 'moderate' ? c.tint.WATCH : c.infoTint }]}>
-              <Ionicons name={rl === 'none' ? 'partly-sunny' : 'rainy'} size={20} color={rl === 'veryHeavy' || rl === 'heavy' ? c.danger : rl === 'moderate' ? c.watch : c.info} />
-              <T style={[font.body, { flex: 1, fontWeight: '600' }]}>{t(RAIN_KEY[rl])}</T>
-            </View>
-            <View style={{ flexDirection: 'row', gap: space.sm }}>
-              <RainStat label={t('past48h')} value={rain.past48} />
-              <RainStat label={t('next24h')} value={rain.next24} hot={rain.next24 >= 44} />
-              <RainStat label={t('next72h')} value={rain.next72} hot={rain.next72 >= 89} />
-            </View>
-            <RainChart times={rain.times} rain={rain.rain} nowIndex={rain.nowIndex} locale={locale} />
-            {rain.peakTime && (
-              <T muted style={font.small}>
-                {t('peakRain')}: {digits(lang, rain.peakHour.toFixed(1))} mm/h · {new Date(rain.peakTime).toLocaleString(locale, { weekday: 'short', hour: '2-digit', minute: '2-digit' })}
-              </T>
+            {rl !== 'none' && (
+              <View style={[s.rainBanner, { backgroundColor: rl === 'veryHeavy' || rl === 'heavy' ? c.tint.DANGER : rl === 'moderate' ? c.tint.WATCH : c.infoTint }]}>
+                <Ionicons name="cloud" size={20} color={rl === 'veryHeavy' || rl === 'heavy' ? c.danger : rl === 'moderate' ? c.watch : c.info} />
+                <T style={[font.small, { flex: 1, fontWeight: '600' }]}>{t(RAIN_KEY[rl])}</T>
+              </View>
             )}
-            <T muted style={font.tiny}>{t('forecastSource')}</T>
+            <RainChart times={rain.times} rain={rain.rain} nowIndex={rain.nowIndex} locale={locale} />
           </>
         ) : rainStatus === 'loading' ? (
           <ActivityIndicator />
@@ -200,7 +203,7 @@ export default function HillDetailScreen({ route, navigation }: Props) {
       <SectionTitle title={t('liveSensors')} right={<T muted style={font.tiny}>{detail.device_id} · {timeAgo(lang, t, r.ts)}</T>} />
       <View style={s.tiles} onLayout={(e) => setTilesW(e.nativeEvent.layout.width)}>
         {METRICS.map((mm) => {
-          const v = r[mm.key as keyof Reading] as number;
+          const v = Number(r[mm.key as keyof Reading] ?? 0);
           const over = mm.threshold != null && v >= mm.threshold;
           return (
             <Card key={mm.key} style={[s.tile, { width: tileW }, over && { borderColor: c.danger, backgroundColor: c.tint.DANGER }]}

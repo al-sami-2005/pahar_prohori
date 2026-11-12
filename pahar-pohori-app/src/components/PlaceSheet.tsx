@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Share, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Share, Text, View } from 'react-native';
 import { districtName, facilityKey, hazardKey, hillName, severityKey, translateReason, type Lang } from '../i18n';
 import type { RootStack } from '../navigation';
 import { useSpeaker } from '../services/speech';
@@ -125,9 +125,10 @@ export function HillPlace({ hill, onClose }: { hill: Hill; onClose: () => void }
   const directions = (live = false) => {
     const from = location ?? { lat: hill.lat, lon: hill.lon };
     const s = nearestShelters(from.lat, from.lon, shelters, 1)[0];
-    if (s) nav.navigate('Route', { shelterId: s.shelter_id, fromHillId: location ? undefined : hill.hill_id, live });
+    if (!s) { Alert.alert(t('tabShelters'), t('noShelterNearby')); return; }
+    nav.navigate('Route', { shelterId: s.shelter_id, fromHillId: location ? undefined : hill.hill_id, live });
   };
-  const share = () => Share.share({ message: `${hillName(lang, hill.name)}: ${t(st.level)} — ${pct(st.probability)}. ${t(g.headline)}. ${mapsLink(hill.lat, hill.lon)}` }).catch(() => undefined);
+  const share = () => Share.share({ message: `${hillName(lang, hill.name)}: ${t(st.level)}, ${pct(st.probability)}. ${t(g.headline)}. ${mapsLink(hill.lat, hill.lon)}` }).catch(() => undefined);
   const speech = `${hillName(lang, hill.name)}. ${t(st.level)}. ${t('riskChance')} ${pct(st.probability)}. ${t(g.headline)}. ${g.items.map((k) => t(k)).join('. ')}`;
 
   return (
@@ -163,16 +164,16 @@ export function HillPlace({ hill, onClose }: { hill: Hill; onClose: () => void }
 
       {tab === 'overview' && (
         <View style={{ paddingTop: space.md }}>
-          <View style={{ marginHorizontal: space.xl, padding: space.lg, borderRadius: radius.lg, backgroundColor: c.tint[st.level], gap: 8 }}>
+          <View style={{ marginHorizontal: space.xl, padding: space.lg, borderRadius: radius.lg, backgroundColor: c.tint[st.level], gap: 6 }}>
             <T style={[font.h3, { color: statusColor[st.level] }]}>{t(g.headline)}</T>
-            {g.items.map((k, i) => (
+            {g.items.slice(0, st.level === 'SAFE' ? 2 : 3).map((k, i) => (
               <View key={k} style={{ flexDirection: 'row', gap: 8 }}>
                 <Text style={{ color: statusColor[st.level], fontWeight: '800' }}>{digits(lang, i + 1)}.</Text>
                 <T style={[font.small, { flex: 1 }]}>{t(k)}</T>
               </View>
             ))}
           </View>
-          {st.reasons.slice(0, 4).map((x) => (
+          {st.reasons.slice(0, 3).map((x) => (
             <InfoRow key={x} icon={/disagree/.test(x) ? 'alert-circle' : 'information-circle'} color={/disagree/.test(x) ? c.watch : statusColor[st.level]} title={translateReason(lang, x)} />
           ))}
           <InfoRow icon="planet" title={t(st.verified_by_nisar ? 'verifiedByNisar' : 'notVerified')}
@@ -189,7 +190,7 @@ export function HillPlace({ hill, onClose }: { hill: Hill; onClose: () => void }
               right={<Ionicons name="navigate" size={18} color={c.dark ? '#8AB4F8' : '#1A73E8'} />} />
           ))}
           <InfoRow icon="call" color={c.danger} title={L(lang, 'Emergency 999', 'জরুরি ৯৯৯')} onPress={() => callNumber('999')} />
-          <InfoRow icon="open-outline" title={L(lang, 'Full details, 7-day charts & satellite data', 'বিস্তারিত, ৭ দিনের চার্ট ও উপগ্রহ তথ্য')}
+          <InfoRow icon="open-outline" title={L(lang, 'Open hill detail', 'পাহাড়ের বিস্তারিত')}
             onPress={() => nav.navigate('HillDetail', { hillId: hill.hill_id })} right={<Ionicons name="chevron-forward" size={18} color={c.muted} />} />
         </View>
       )}
@@ -200,6 +201,7 @@ export function HillPlace({ hill, onClose }: { hill: Hill; onClose: () => void }
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
             {r && ([
               ['water', t('soilMoisture'), r.soil_moisture.toFixed(3), 'm³/m³', r.soil_moisture >= 0.32],
+              ['rainy', t('rainfall'), (r.rainfall_mm ?? 0).toFixed(1), 'mm', (r.rainfall_mm ?? 0) >= 1],
               ['pulse', t('acceleration'), r.acceleration.toFixed(3), 'g', r.acceleration >= 0.02],
               ['cloud', t('humidity'), r.humidity.toFixed(0), '%', false],
               ['thermometer', t('temperature'), r.temperature.toFixed(1), '°C', false],
@@ -213,7 +215,7 @@ export function HillPlace({ hill, onClose }: { hill: Hill; onClose: () => void }
             ))}
           </View>
           <Pressable onPress={() => nav.navigate('HillDetail', { hillId: hill.hill_id })}>
-            <Text style={{ color: c.dark ? '#8AB4F8' : '#1A73E8', fontWeight: '600' }}>{L(lang, 'See 7-day charts →', '৭ দিনের চার্ট দেখুন →')}</Text>
+            <Text style={{ color: c.dark ? '#8AB4F8' : '#1A73E8', fontWeight: '600' }}>{L(lang, 'Open 7-day charts', '৭ দিনের চার্ট')}</Text>
           </Pressable>
         </View>
       )}
@@ -339,8 +341,9 @@ export function GeoPlace({ place, onClose, onPickHill }: { place: GeoResult; onC
 /* ====================================================================== */
 /*  EXPLORE (nothing selected)                                             */
 /* ====================================================================== */
-export function ExploreContent({ onPickHill, onReplay, onSaved, savedOpen }: {
+export function ExploreContent({ onPickHill, onReplay, onSaved, savedOpen, onFilterLevel }: {
   onPickHill: (h: Hill) => void; onReplay: () => void; onSaved: (p: { lat: number; lon: number; key: string }) => void; savedOpen?: boolean;
+  onFilterLevel?: (l: Level) => void;
 }) {
   const nav = useNavigation<Nav>();
   const { t, lang, hills, summary, settings, source } = useApp();
@@ -348,7 +351,7 @@ export function ExploreContent({ onPickHill, onReplay, onSaved, savedOpen }: {
   const quick: { icon: IconName; label: string; color: string; onPress: () => void }[] = [
     { icon: 'call', label: 'SOS 999', color: c.danger, onPress: () => nav.navigate('Tabs', { screen: 'SOS' }) },
     { icon: 'home', label: t('tabShelters'), color: c.info, onPress: () => nav.navigate('Tabs', { screen: 'Shelters' }) },
-    { icon: 'pulse', label: L(lang, 'Live system', 'লাইভ সিস্টেম'), color: c.safe, onPress: () => nav.navigate('AboutModel') },
+    { icon: 'pulse', label: t('moreModel'), color: c.safe, onPress: () => nav.navigate('AboutModel') },
     { icon: 'time', label: t('replay'), color: c.violet, onPress: onReplay },
     { icon: 'megaphone', label: L(lang, 'Report', 'রিপোর্ট'), color: c.watch, onPress: () => nav.navigate('Report') },
     { icon: 'book', label: L(lang, 'Safety', 'নিরাপত্তা'), color: c.teal, onPress: () => nav.navigate('SafetyGuide') },
@@ -358,15 +361,16 @@ export function ExploreContent({ onPickHill, onReplay, onSaved, savedOpen }: {
       <View style={{ paddingHorizontal: space.xl, gap: 2 }}>
         <T style={[font.h2]}>{L(lang, 'Chittagong Hill Tracts', 'পার্বত্য চট্টগ্রাম')}</T>
         <T muted style={font.small}>
-          {digits(lang, summary.total_hills)} {t('hillsMonitored')} · {source === 'live' ? L(lang, 'live data', 'সরাসরি তথ্য') : source === 'cache' ? L(lang, 'offline copy', 'অফলাইন কপি') : L(lang, 'demo data', 'ডেমো তথ্য')}
+          {digits(lang, summary.total_hills)} {t('hillsMonitored')} · {source === 'live' ? L(lang, 'live', 'সরাসরি') : source === 'cache' ? L(lang, 'offline', 'অফলাইন') : L(lang, 'saved snapshot', 'সংরক্ষিত স্ন্যাপশট')}
         </T>
       </View>
       <View style={{ flexDirection: 'row', marginHorizontal: space.xl, marginTop: space.md, borderRadius: radius.lg, borderWidth: 1, borderColor: c.line }}>
         {(['DANGER', 'WATCH', 'SAFE'] as Level[]).map((l, i) => (
-          <View key={l} style={{ flex: 1, alignItems: 'center', paddingVertical: 10, borderLeftWidth: i ? 1 : 0, borderColor: c.line }}>
+          <Pressable key={l} onPress={() => onFilterLevel?.(l)} accessibilityRole="button" accessibilityLabel={t(l)}
+            style={{ flex: 1, alignItems: 'center', paddingVertical: 10, borderLeftWidth: i ? 1 : 0, borderColor: c.line, cursor: 'pointer' as const }}>
             <Text style={{ fontSize: 22, fontWeight: '800', color: statusColor[l] }}>{digits(lang, summary.counts[l] ?? 0)}</Text>
             <Text style={{ fontSize: 11, color: c.muted }}>{t(l)}</Text>
-          </View>
+          </Pressable>
         ))}
       </View>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: space.md, paddingTop: space.md }}>

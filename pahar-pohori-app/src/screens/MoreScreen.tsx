@@ -30,7 +30,7 @@ export default function MoreScreen() {
   const renderItems = (items: Item[]) => (
     <Card style={{ padding: 0 }}>
       {items.map((it, i) => (
-        <Pressable key={it.to} onPress={() => nav.navigate(it.to as never)}
+        <Pressable key={it.to} onPress={() => nav.navigate(it.to as never)} accessibilityRole="button" accessibilityLabel={t(it.title)}
           style={({ pressed }) => [styles.item, i > 0 && styles.itemBorder, pressed && { backgroundColor: colors.surfaceAlt }]}>
           <View style={[styles.icon, { backgroundColor: `${it.color}1A` }]}><Ionicons name={it.icon} size={20} color={it.color} /></View>
           <View style={{ flex: 1 }}>

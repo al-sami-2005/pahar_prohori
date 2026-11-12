@@ -69,7 +69,7 @@ export default function SheltersScreen() {
       )}
 
       {list.length === 0 ? (
-        <EmptyState icon="home" title={t('noHillsMatch')} />
+        <EmptyState icon="home" title={t('noSheltersMatch')} />
       ) : (
         <View style={styles.grid} onLayout={(e) => setW(e.nativeEvent.layout.width)}>
           {list.map((s) => (

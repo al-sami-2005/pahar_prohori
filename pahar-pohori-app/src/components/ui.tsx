@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { digits } from '../i18n';
+import { goBackSmart } from '../navigation/back';
 import { useApp } from '../store';
 import { font, makeStyles, radius, shadowSoft, space, statusColor, statusIcon, useTheme } from '../theme';
 import type { Level } from '../types';
@@ -37,9 +38,10 @@ export function T({ style, children, numberOfLines, muted }: {
 
 /* ---------------- screen shell ---------------- */
 export function Screen({
-  title, subtitle, back, right, children, refreshable, scroll = true,
+  title, subtitle, back, backTo = 'Map', right, children, refreshable, scroll = true,
 }: {
-  title?: string; subtitle?: string; back?: boolean; right?: React.ReactNode; children: React.ReactNode;
+  title?: string; subtitle?: string; back?: boolean; backTo?: 'Map' | 'More';
+  right?: React.ReactNode; children: React.ReactNode;
   refreshable?: boolean; scroll?: boolean;
 }) {
   const insets = useSafeAreaInsets();
@@ -50,7 +52,7 @@ export function Screen({
   const header = (title || back) && (
     <View style={{ flexDirection: 'row', alignItems: 'center', paddingTop: space.md, paddingBottom: space.lg, gap: space.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, flex: 1 }}>
-        {back && <IconBtn icon="chevron-back" onPress={() => nav.goBack()} label="Back" />}
+        {back && <IconBtn icon="chevron-back" onPress={() => goBackSmart(nav, backTo)} label="Back" />}
         <View style={{ flex: 1 }}>
           {!!title && <T style={font.h1}>{title}</T>}
           {!!subtitle && <T muted style={[font.small, { marginTop: 2 }]}>{subtitle}</T>}
@@ -88,7 +90,11 @@ export function Card({ children, style, onPress }: {
   const base = [s.card, style];
   if (!onPress) return <View style={base}>{children}</View>;
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [base, pressed && { opacity: 0.85, transform: [{ scale: 0.995 }] }]}>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      style={({ pressed }) => [base, pressed && { opacity: 0.85, transform: [{ scale: 0.995 }] }, { cursor: 'pointer' as const }]}
+    >
       {children}
     </Pressable>
   );
@@ -103,8 +109,9 @@ export function Chip({ label, active, onPress, icon, color, count }: {
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
+      accessibilityLabel={label}
       accessibilityState={{ selected: !!active }}
-      style={[s.chip, active && { backgroundColor: c.chipOn }]}
+      style={[s.chip, active && { backgroundColor: c.chipOn }, { cursor: 'pointer' as const }]}
     >
       {color && <View style={[s.dot, { backgroundColor: color }]} />}
       {icon && <Ionicons name={icon} size={14} color={active ? c.chipOnText : c.inkSoft} />}
@@ -142,16 +149,16 @@ export function IconBtn({ icon, onPress, label, size = 44, color, bg, active }: 
       onPress={onPress}
       accessibilityLabel={label}
       accessibilityRole="button"
-      hitSlop={6}
+      hitSlop={10}
       style={({ pressed }) => [
-        { width: size, height: size, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
+        { width: size, height: size, borderRadius: 999, alignItems: 'center', justifyContent: 'center', cursor: 'pointer' as const },
         { backgroundColor: bg ?? (active ? c.chipOn : c.elevated) },
         !bg && shadowSoft,
         !bg && c.dark && { borderWidth: StyleSheet.hairlineWidth, borderColor: c.line },
         pressed && { opacity: 0.7 },
       ]}
     >
-      <Ionicons name={icon} size={size * 0.45} color={color ?? (active ? c.chipOnText : c.ink)} />
+      <Ionicons name={icon} size={size * 0.45} color={color ?? (active ? c.chipOnText : c.ink)} pointerEvents="none" />
     </Pressable>
   );
 }

@@ -73,7 +73,7 @@ export default function RiskMap({
           className: '', iconSize: [22, 22], iconAnchor: [11, 11],
           html: `<div class="pp-report" style="background:${r.severity === 'high' ? c.danger : c.watch}">${MEGAPHONE_SVG}</div>`,
         }),
-        title: `${r.hazard_type}${r.description ? ` — ${r.description}` : ''}`,
+        title: `${r.hazard_type}${r.description ? `: ${r.description}` : ''}`,
       }).addTo(g);
     });
     hills.forEach((h) => {

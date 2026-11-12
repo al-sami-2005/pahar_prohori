@@ -13,7 +13,7 @@ const SETTINGS_KEY = 'pp:settings:v1';
 const CACHE_KEY = 'pp:cache:v1';
 const QUEUE_KEY = 'pp:reportQueue:v1';
 const SEEN_ALERT_KEY = 'pp:lastAlertId:v1';
-const POLL_MS = 60_000;
+const POLL_MS = 15_000; // keep map status / latest sensors feeling live
 
 export interface Settings {
   lang: Lang;

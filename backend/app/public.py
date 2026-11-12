@@ -1,16 +1,4 @@
-"""
-Public-facing endpoints for the Pahar Pohori mobile app (mass-people features).
-
-  GET  /api/summary                 -> counts per status for the dashboard header
-  GET  /api/shelters                -> all shelters (optional ?lat=&lon= to sort by distance)
-  GET  /api/hills/{id}/shelters     -> nearest shelters to one hill
-  GET  /api/emergency-contacts      -> hotline numbers for the SOS screen
-  GET  /api/reports                 -> recent community hazard reports
-  POST /api/reports                 -> citizen submits a hazard report (crack, seepage, ...)
-  POST /api/refresh                 -> recompute risk status for all hills
-
-Mounted from app/main.py with `app.include_router(public.router)`.
-"""
+"""Public API: summary, shelters, SOS contacts, reports, refresh."""
 import math
 from datetime import datetime, timezone
 from pathlib import Path
@@ -21,9 +9,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.db import conn
-from app.hill_status import hill_status
+from app.status import hill_status
 from app.live import record_event
-from app.status_refresh import refresh_all_hills
+from app.refresh import refresh_all_hills
 
 router = APIRouter(prefix="/api", tags=["public"])
 
@@ -88,7 +76,7 @@ def _with_distance(shelters, lat, lon):
     return sorted(res, key=lambda s: s["distance_km"])
 
 
-@router.get("/summary", summary="Dashboard header — counts per status")
+@router.get("/summary", summary="Dashboard header: counts per status")
 def summary():
     c = conn()
     counts = {"SAFE": 0, "WATCH": 0, "DANGER": 0, "NO_DATA": 0}

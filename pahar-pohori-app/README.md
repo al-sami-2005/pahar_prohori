@@ -15,7 +15,7 @@ Google *Maps SDK for Android* key in `app.json → android.config.googleMaps.api
 ## 1. Run it
 
 ```bash
-# terminal 1 — backend (from ../landslide-backend-for-frontend)
+# terminal 1: backend (from ../backend)
 pip install -r requirements.txt
 uvicorn app.main:app --host 0.0.0.0 --port 8000      # --host 0.0.0.0 so phones on Wi-Fi can reach it
 
@@ -53,7 +53,7 @@ built-in demo snapshot taken from this backend, with a banner saying so.
 
 Everything is bilingual (English / বাংলা, including Bangla digits, hill names and model reasons).
 
-### Version 3 — maps-app layout + Live System
+### Version 3 — maps-app layout + Live Watch
 
 | Feature | Where |
 |---|---|
@@ -61,7 +61,7 @@ Everything is bilingual (English / বাংলা, including Bangla digits, hil
 | **Search anything** | Hills, shelters and districts instantly; any village/town/road in Bangladesh via OpenStreetMap; recent searches. |
 | **Place cards** | Hill: chance %, action pills (Directions to shelter · Start live navigation · Save · Listen · Share · Report) and tabs *Overview / Sensors / Rain / Reports*. Shelter: Directions, Start, Call, Save, facilities, hills nearby. Searched place: safety check (Danger hill within 10 km?) + route to nearest shelter **from that place**. |
 | **Saved places** | Bookmark hills, shelters or places; *Saved* chip lists them with live status. |
-| **Live System page** | *LIVE · 6 sensors* pill on the map or *More → Live system*: animated pipeline Sensors → NISAR → AI → Alerts, live counters (readings stored, readings/min, model runs, ms per run, uptime, alerts, reports), every hill's node with last-packet timer, soil sparkline and live landslide chance, and a scrolling event log. Data from `/api/system-status` + `/api/live-feed`. |
+| **Live Watch page** | *LIVE · 6 sensors* pill on the map or *More → Live watch*: pipeline Sensors → NISAR → Model → Alerts, live counters, per-hill nodes, soil sparkline, and event log. Data from `/api/system-status` + `/api/live-feed`. |
 
 ### Version 2 additions
 

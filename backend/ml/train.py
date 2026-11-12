@@ -1,7 +1,4 @@
-"""
-STEP 10 - Train the landslide prediction model.
-Output: ml/landslide_model.joblib (loaded by the backend).
-"""
+"""Train Random Forest → ml/model.joblib + ml/model_report.json."""
 import json
 import sys
 from pathlib import Path
@@ -14,6 +11,8 @@ from sklearn.model_selection import train_test_split
 
 sys.path.insert(0, str(Path(__file__).parent))
 from features import FEATURES  # noqa: E402
+
+OUT = Path("ml/model.joblib")
 
 
 def main():
@@ -37,12 +36,12 @@ def main():
     for f, v in importance:
         print(f"  {f:24s} {v:.3f}")
 
-    joblib.dump(model, "ml/landslide_model.joblib")
+    joblib.dump(model, OUT)
     Path("ml/model_report.json").write_text(json.dumps({
         "roc_auc": round(auc, 3),
         "feature_importance": {f: round(float(v), 3) for f, v in importance},
     }, indent=2))
-    print("Saved ml/landslide_model.joblib")
+    print(f"Saved {OUT}")
 
 
 if __name__ == "__main__":

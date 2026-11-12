@@ -13,6 +13,8 @@ def hill_status(c, hill_id):
             "danger_until": None,
             "updated_at": None,
         }
+    keys = s.keys() if hasattr(s, "keys") else []
+    rain = s["rain_mm"] if "rain_mm" in keys else None
     return {
         "level": s["level"],
         "probability": s["probability"],
@@ -20,4 +22,5 @@ def hill_status(c, hill_id):
         "verified_by_nisar": bool(s["verified"]),
         "danger_until": s["danger_until"],
         "updated_at": s["updated_at"],
+        "rain_mm_5h": rain,
     }

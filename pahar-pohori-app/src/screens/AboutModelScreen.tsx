@@ -1,15 +1,17 @@
 /**
- * Live System — shows the whole early-warning pipeline running right now:
- * field sensors streaming → NISAR satellite layer → AI model scoring every hill → alerts.
- * All numbers come from GET /api/system-status and /api/live-feed (polled every few seconds).
+ * Live watch: sensors → NISAR → model scores → alerts.
+ * Numbers from GET /api/system-status and /api/live-feed.
  */
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Platform, Text, View } from 'react-native';
 import Svg, { Polyline } from 'react-native-svg';
 import { api, demo } from '../api';
 import { Card, Screen, SectionTitle, StatusBadge, T, digits, useResponsive, type IconName } from '../components/ui';
 import { hillName, type Lang } from '../i18n';
+import type { RootStack } from '../navigation';
 import { useApp } from '../store';
 import { font, light, radius, space, statusColor, useTheme } from '../theme';
 import type { LiveEvent, ModelInfo, SystemStatus } from '../types';
@@ -109,6 +111,7 @@ const fmtUptime = (s: number) => {
 
 /* ====================================================================== */
 export default function LiveSystemScreen() {
+  const nav = useNavigation<NativeStackNavigationProp<RootStack>>();
   const { t, lang, settings } = useApp();
   const c = useTheme();
   const { cols } = useResponsive();
@@ -125,8 +128,8 @@ export default function LiveSystemScreen() {
   const pulseKind = lastEvent && serverNow - new Date(lastEvent.ts).getTime() < 2500 ? lastEvent.kind : null;
 
   return (
-    <Screen back title={L(lang, 'Live system', 'লাইভ সিস্টেম')}
-      subtitle={L(lang, 'Sensors → NISAR satellite → AI model → Alerts, running now', 'সেন্সর → NISAR উপগ্রহ → এআই মডেল → সতর্কতা, এখন চলছে')}
+    <Screen back backTo="Map" title={t('moreModel')}
+      subtitle={L(lang, 'Sensors, NISAR, model, then alerts', 'সেন্সর, NISAR, মডেল, তারপর সতর্কতা')}
       right={<OnlinePill online={online} />}>
 
       {/* ---------- pipeline ---------- */}
@@ -143,7 +146,7 @@ export default function LiveSystemScreen() {
             line2={status?.nisar.latest_pass ?? ''} />
           <Flow color={c.info} on={!!online} delay={300} />
           <Stage icon="sparkles" color={c.violet} active={pulseKind === 'model'}
-            title={L(lang, 'AI model', 'এআই মডেল')}
+            title={L(lang, 'Model', 'মডেল')}
             line1={status ? `${digits(lang, status.model.trees ?? '')} ${L(lang, 'trees', 'ট্রি')}` : '—'}
             line2={status?.model.avg_ms != null ? `${digits(lang, Math.round(status.model.avg_ms))} ms` : ''} />
           <Flow color={c.violet} on={!!online} delay={600} />
@@ -158,7 +161,7 @@ export default function LiveSystemScreen() {
         <Card style={{ marginTop: space.md, flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: c.tint.WATCH }}>
           <Ionicons name="cloud-offline" size={20} color={c.watch} />
           <T style={[font.small, { flex: 1 }]}>
-            {L(lang, 'Cannot reach the server right now. Start the backend to see the live pipeline.', 'এখন সার্ভারে সংযোগ নেই। লাইভ পাইপলাইন দেখতে ব্যাকএন্ড চালু করুন।')}
+            {L(lang, 'Server offline. Start the backend to see live data.', 'সার্ভার অফলাইন। লাইভ দেখতে ব্যাকএন্ড চালু করুন।')}
           </T>
         </Card>
       )}
@@ -167,28 +170,25 @@ export default function LiveSystemScreen() {
       {status && (
         <>
           <SectionTitle title={L(lang, 'Right now', 'এই মুহূর্তে')}
-            right={<T muted style={font.tiny}>{L(lang, 'updates every 4 s', 'প্রতি ৪ সেকেন্ডে হালনাগাদ')}</T>} />
+            right={<T muted style={font.tiny}>{fmtUptime(uptime)}</T>} />
           <Grid n={cols(2, 4, 4)}>
-            <Kpi icon="server" color={c.safe} label={L(lang, 'Sensor readings stored', 'সংরক্ষিত সেন্সর রিডিং')} value={status.readings.total} />
-            <Kpi icon="speedometer" color={c.teal} label={L(lang, 'Readings per minute', 'প্রতি মিনিটে রিডিং')} value={status.readings.per_min} dec={1} />
-            <Kpi icon="sparkles" color={c.violet} label={L(lang, 'Model runs (this session)', 'মডেল চালানো (এই সেশন)')} value={status.model.runs} />
-            <Kpi icon="analytics" color={c.violet} label={L(lang, 'Hill risk scores computed', 'পাহাড়ের ঝুঁকি হিসাব')} value={status.model.hill_scores} />
-            <Kpi icon="flash" color={c.watch} label={L(lang, 'Model time per run', 'প্রতি রানে সময়')} value={status.model.avg_ms ?? 0} suffix=" ms" />
-            <Kpi icon="time" color={c.info} label={L(lang, 'Uptime', 'চালু আছে')} text={fmtUptime(uptime)} />
-            <Kpi icon="warning" color={c.danger} label={L(lang, 'Danger alerts sent', 'বিপদ সতর্কতা পাঠানো')} value={status.alerts.total} />
-            <Kpi icon="megaphone" color={c.watch} label={L(lang, 'Community reports', 'স্থানীয়দের রিপোর্ট')} value={status.reports_total} />
+            <Kpi icon="speedometer" color={c.teal} label={L(lang, 'Readings / min', 'রিডিং / মিনিট')} value={status.readings.per_min} dec={1} />
+            <Kpi icon="flash" color={c.watch} label={L(lang, 'Model ms', 'মডেল ms')} value={status.model.avg_ms ?? 0} />
+            <Kpi icon="warning" color={c.danger} label={L(lang, 'Danger alerts', 'বিপদ সতর্কতা')} value={status.alerts.total} />
+            <Kpi icon="server" color={c.safe} label={L(lang, 'Stored readings', 'সংরক্ষিত রিডিং')} value={status.readings.total} />
           </Grid>
 
           {/* ---------- per hill ---------- */}
-          <SectionTitle title={L(lang, 'Every hill, scored live', 'প্রতিটি পাহাড়, সরাসরি হিসাব')}
-            right={<T muted style={font.tiny}>{L(lang, `model every ${status.intervals.model_s}s`, `প্রতি ${digits(lang, status.intervals.model_s)} সে. মডেল`)}</T>} />
+          <SectionTitle title={L(lang, 'Each hill', 'প্রতিটি পাহাড়')}
+            right={<T muted style={font.tiny}>{L(lang, `scored every ${status.intervals.model_s}s`, `প্রতি ${digits(lang, status.intervals.model_s)} সে. হিসাব`)}</T>} />
           <Grid n={cols(1, 2, 3)}>
             {status.nodes.map((n) => {
               const age = n.last_ts ? (serverNow - new Date(n.last_ts).getTime()) / 1000 : null;
               const scored = n.scored_at ? (serverNow - new Date(n.scored_at).getTime()) / 1000 : null;
               const fresh = lastEvent?.device_id === n.device_id && pulseKind === 'reading';
               return (
-                <Card key={n.hill_id} style={{ gap: 10, borderColor: fresh ? c.safe : c.line }}>
+                <Card key={n.hill_id} style={{ gap: 10, borderColor: fresh ? c.safe : c.line }}
+                  onPress={() => nav.navigate('HillDetail', { hillId: n.hill_id })}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                     <Dot on={n.online} />
                     <View style={{ flex: 1 }}>
@@ -215,8 +215,8 @@ export default function LiveSystemScreen() {
                     </View>
                   </View>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <T muted style={font.tiny}>📡 {age != null ? ago(lang, age) : '—'}</T>
-                    <T muted style={font.tiny}>🧠 {scored != null ? ago(lang, scored) : '—'}</T>
+                    <T muted style={font.tiny}>{L(lang, 'Reading', 'রিডিং')} {age != null ? ago(lang, age) : '—'}</T>
+                    <T muted style={font.tiny}>{L(lang, 'Scored', 'স্কোর')} {scored != null ? ago(lang, scored) : '—'}</T>
                   </View>
                 </Card>
               );
@@ -240,15 +240,13 @@ export default function LiveSystemScreen() {
       {status?.simulated && (
         <T muted style={[font.tiny, { marginTop: 8 }]}>
           {L(lang,
-            'Demo stream: field nodes are simulated from the 7-day archive until physical sensors push data to POST /api/ingest. The model, NISAR cross-check and alerts run for real.',
-            'ডেমো স্ট্রিম: আসল সেন্সর POST /api/ingest-এ তথ্য পাঠানো শুরু না করা পর্যন্ত ৭ দিনের আর্কাইভ থেকে নোডগুলো সিমুলেট করা হচ্ছে। মডেল, NISAR যাচাই ও সতর্কতা আসলেই চলছে।')}
+            'Field nodes replay the 7-day archive until sensors POST to /api/ingest. The model, NISAR check and alerts still run on that stream.',
+            'সেন্সর POST /api/ingest-এ তথ্য না পাঠানো পর্যন্ত নোডগুলো ৭ দিনের আর্কাইভ রিপ্লে করে। মডেল, NISAR যাচাই ও সতর্কতা এই স্ট্রিমেই চলে।')}
         </T>
       )}
 
-      {/* ---------- how it decides ---------- */}
-      <SectionTitle title={L(lang, 'How the prediction works', 'পূর্বাভাস কীভাবে কাজ করে')} />
+      <SectionTitle title={t('modelTitle')} />
       <Card style={{ gap: space.md }}>
-        <T style={[font.body, { lineHeight: 23 }]}>{t('modelIntro')}</T>
         <View style={{ flexDirection: 'row', gap: 8, backgroundColor: c.infoTint, padding: space.md, borderRadius: radius.md }}>
           <Ionicons name="shield-checkmark" size={18} color={c.info} />
           <T style={[font.small, { flex: 1, lineHeight: 20, color: c.inkSoft }]}>{t('modelRule')}</T>
@@ -257,10 +255,8 @@ export default function LiveSystemScreen() {
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             {[
               `${status.model.type}`,
-              `${status.model.features} ${L(lang, 'features', 'ফিচার')}`,
-              `${L(lang, 'window', 'উইন্ডো')} ${status.model.window_readings} ${L(lang, 'readings', 'রিডিং')}`,
+              `${status.model.window_hours ?? 5}h ${L(lang, 'window', 'উইন্ডো')}`,
               `DANGER ≥ ${Math.round(status.model.danger_threshold * 100)}% + NISAR`,
-              `WATCH ≥ ${Math.round(status.model.watch_threshold * 100)}%`,
               ...status.nisar.products,
             ].map((x) => (
               <View key={x} style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: c.chip }}>
@@ -269,24 +265,18 @@ export default function LiveSystemScreen() {
             ))}
           </View>
         )}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.lg }}>
+          <Text style={{ fontSize: 36, fontWeight: '700', color: c.ink, letterSpacing: -1 }}>{digits(lang, info.roc_auc.toFixed(2))}</Text>
+          <T muted style={[font.small, { flex: 1 }]}>{t('modelAccuracy')}</T>
+        </View>
+        <FeatureBars info={info} />
       </Card>
-
-      <SectionTitle title={t('modelAccuracy')} />
-      <Card style={{ flexDirection: 'row', alignItems: 'center', gap: space.lg }}>
-        <Text style={{ fontSize: 40, fontWeight: '700', color: c.ink, letterSpacing: -1 }}>{digits(lang, info.roc_auc.toFixed(2))}</Text>
-        <T muted style={[font.small, { flex: 1 }]}>
-          {L(lang, '0.5 = guessing, 1.0 = perfect. Improves as more field data is collected.', '০.৫ = আন্দাজ, ১.০ = নিখুঁত। আরও মাঠপর্যায়ের তথ্য পেলে মান বাড়বে।')}
-        </T>
-      </Card>
-
-      <SectionTitle title={t('modelFeatures')} />
-      <FeatureBars info={info} />
     </Screen>
   );
 }
 
 const KIND_COLOR: Record<string, string> = { reading: '#7EE2A8', model: '#B8A4FF', alert: '#FF8A8E', system: '#7FB6FF', error: '#FFB547' };
-const KIND_TAG: Record<string, string> = { reading: 'RX', model: 'AI', alert: 'ALERT', system: 'SYS', error: 'ERR' };
+const KIND_TAG: Record<string, string> = { reading: 'RX', model: 'MODEL', alert: 'ALERT', system: 'SYS', error: 'ERR' };
 
 /* ---------------- pieces ---------------- */
 function OnlinePill({ online, small }: { online: boolean | null; small?: boolean }) {

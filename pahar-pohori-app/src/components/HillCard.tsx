@@ -53,8 +53,9 @@ export function HillCard({ hill, onOpen, onRoute, onClose, floating = true }: {
         <View style={[s.row, { flexWrap: 'wrap', gap: 6, marginTop: 2 }]}>
           <Tag icon="trending-up" text={`${digits(lang, hill.slope_deg)}°`} />
           {r && <Tag icon="water" text={r.soil_moisture.toFixed(2)} />}
+          {(st.rain_mm_5h ?? 0) >= 1 && <Tag icon="rainy" text={`${digits(lang, Math.round(st.rain_mm_5h!))} mm/5h`} hot={(st.rain_mm_5h ?? 0) >= 12} />}
           {r && <Tag icon="pulse" text={`${r.acceleration.toFixed(3)} g`} />}
-          {rain && <Tag icon="rainy" text={`${digits(lang, Math.round(rain.next24))} mm/24h`} hot={rain.next24 >= 44} />}
+          {rain && rain.next24 >= 5 && <Tag icon="cloud" text={`${digits(lang, Math.round(rain.next24))} mm/24h`} hot={rain.next24 >= 44} />}
         </View>
         {onRoute && st.level !== 'SAFE' && (
           <Pressable onPress={onRoute} style={[s.routeBtn, st.level === 'DANGER' && { backgroundColor: c.danger }]} accessibilityRole="button">

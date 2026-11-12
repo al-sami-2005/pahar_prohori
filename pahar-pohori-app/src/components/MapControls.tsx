@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { Modal, Platform, Pressable, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrubArea } from './ScrubArea';
 import type { StringKey } from '../i18n';
 import { useApp } from '../store';
 import { font, radius, shadow, space, statusColor, useTheme } from '../theme';
@@ -147,19 +148,18 @@ export function ReplayBar({ timeline, index, onIndex, playing, onPlay, onClose }
           <Text style={{ color: c.safe, fontWeight: '700', fontSize: 12 }}>● {t('live')}</Text>
         </Pressable>
       </View>
-      <View
-        onLayout={(e) => setW(e.nativeEvent.layout.width)}
-        onStartShouldSetResponder={() => true}
-        onMoveShouldSetResponder={() => true}
-        onResponderGrant={(e) => { onPlay(false); pick(e.nativeEvent.locationX); }}
-        onResponderMove={(e) => pick(e.nativeEvent.locationX)}
-        style={{ height: 28, justifyContent: 'center' }}
-      >
-        <View style={{ height: 8, borderRadius: 4, backgroundColor: c.chip, flexDirection: 'row', overflow: 'hidden' }}>
-          {danger.map((d, i) => <View key={i} style={{ flex: 1, backgroundColor: d ? `${c.danger}88` : 'transparent' }} />)}
-        </View>
-        <View style={{ position: 'absolute', left: 0, width: `${frac * 100}%`, height: 8, borderRadius: 4, backgroundColor: `${c.ink}30` }} pointerEvents="none" />
-        <View pointerEvents="none" style={{ position: 'absolute', left: Math.max(0, frac * w - 11), width: 22, height: 22, borderRadius: 11, backgroundColor: c.chipOn, borderWidth: 3, borderColor: c.surface }} />
+      <View onLayout={(e) => setW(e.nativeEvent.layout.width)} style={{ height: 28, justifyContent: 'center' }}>
+        <ScrubArea
+          height={28}
+          onScrub={(x) => { onPlay(false); pick(x); }}
+          style={{ justifyContent: 'center' }}
+        >
+          <View style={{ height: 8, borderRadius: 4, backgroundColor: c.chip, flexDirection: 'row', overflow: 'hidden' }} pointerEvents="none">
+            {danger.map((d, i) => <View key={i} style={{ flex: 1, backgroundColor: d ? `${c.danger}88` : 'transparent' }} />)}
+          </View>
+          <View style={{ position: 'absolute', left: 0, width: `${frac * 100}%`, height: 8, borderRadius: 4, backgroundColor: `${c.ink}30` }} pointerEvents="none" />
+          <View pointerEvents="none" style={{ position: 'absolute', left: Math.max(0, frac * w - 11), width: 22, height: 22, borderRadius: 11, backgroundColor: c.chipOn, borderWidth: 3, borderColor: c.surface }} />
+        </ScrubArea>
       </View>
       <View style={{ flexDirection: 'row', gap: 14 }}>
         {(['DANGER', 'WATCH', 'SAFE'] as const).map((l) => (

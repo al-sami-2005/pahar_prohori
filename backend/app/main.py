@@ -1,8 +1,4 @@
-"""
-Hill Tracts Landslide Early Warning — frontend API.
-Run:  uvicorn app.main:app --port 8000
-Guide: http://localhost:8000/guide
-"""
+"""Pahar Pohori API. Run: uvicorn app.main:app --host 0.0.0.0 --port 8000"""
 import json
 from pathlib import Path
 
@@ -11,20 +7,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 from app.db import conn, init_db
-from app.hill_status import hill_status
+from app.status import hill_status
 from app.public import init_public_tables, router as public_router
 from app.timeline import router as timeline_router
 from app.live import router as live_router, start_pipeline
-from app.status_refresh import refresh_all_hills
+from app.refresh import refresh_all_hills
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-GUIDE = BASE_DIR / "docs" / "frontend-api.html"
+GUIDE = BASE_DIR / "docs" / "api.html"
 WEB_DIST = (BASE_DIR.parent / "pahar-pohori-app" / "dist").resolve()
 
 app = FastAPI(
-    title="Hill Tracts Landslide Early Warning API",
-    description="Frontend endpoints for map, hill detail, 7-day charts, and alerts. "
-                "Human guide: [/guide](/guide)",
+    title="Pahar Pohori API",
+    description="Map, hill detail, charts, alerts. Guide: [/guide](/guide)",
     version="1.0.0",
 )
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -55,7 +50,7 @@ def frontend_guide():
     return FileResponse(GUIDE)
 
 
-@app.get("/api/hills", tags=["frontend"], summary="Map screen — all hills")
+@app.get("/api/hills", tags=["frontend"], summary="Map screen: all hills")
 def list_hills():
     """All hills with latest sensor reading + SAFE/WATCH/DANGER status."""
     c = conn()

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 import Svg, { Circle, Defs, Line, LinearGradient, Path, Stop, Text as SvgText } from 'react-native-svg';
 import { makeStyles, useTheme } from '../theme';
+import { ScrubArea } from './ScrubArea';
 
 interface Props {
   values: number[];
@@ -18,7 +19,7 @@ interface Props {
 const PAD_T = 14;
 const PAD_B = 22;
 
-/** Lightweight SVG line chart with touch scrubbing (no chart library needed). */
+/** Lightweight SVG line chart with touch/mouse scrubbing. */
 export default function LineChart({
   values, times, color, threshold, thresholdLabel, unit, decimals = 2, height = 170, locale = 'en-GB',
 }: Props) {
@@ -40,7 +41,6 @@ export default function LineChart({
     let d = '';
     values.forEach((v, i) => { d += `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`; });
     const area = `${d}L${w},${height - PAD_B}L0,${height - PAD_B}Z`;
-    // day ticks
     const ticks: { x: number; label: string }[] = [];
     let lastDay = '';
     times.forEach((t, i) => {
@@ -75,50 +75,49 @@ export default function LineChart({
         </Text>
         <Text style={styles.time}>
           {curTime ? curTime.toLocaleString(locale, { weekday: 'short', hour: '2-digit', minute: '2-digit' }) : ''}
+          {idx != null ? ' · drag' : ''}
         </Text>
       </View>
-      <View
-        onLayout={(e) => setW(e.nativeEvent.layout.width)}
-        style={{ height }}
-        onStartShouldSetResponder={() => true}
-        onMoveShouldSetResponder={() => true}
-        onResponderGrant={(e) => scrub(e.nativeEvent.locationX)}
-        onResponderMove={(e) => scrub(e.nativeEvent.locationX)}
-        onResponderRelease={() => setTimeout(() => setIdx(null), 1500)}
-      >
-        {geo && (
-          <Svg width={w} height={height}>
-            <Defs>
-              <LinearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-                <Stop offset="0" stopColor={color} stopOpacity={0.28} />
-                <Stop offset="1" stopColor={color} stopOpacity={0} />
-              </LinearGradient>
-            </Defs>
-            <Line x1={0} x2={w} y1={height - PAD_B} y2={height - PAD_B} stroke={colors.line} strokeWidth={1} />
-            {geo.ticks.map((t) => (
-              <React.Fragment key={t.x}>
-                <Line x1={t.x} x2={t.x} y1={PAD_T} y2={height - PAD_B} stroke={colors.line} strokeWidth={1} strokeDasharray="2,4" />
-                <SvgText x={t.x + 3} y={height - 6} fontSize={10} fill={colors.muted}>{t.label}</SvgText>
-              </React.Fragment>
-            ))}
-            {threshold != null && (
-              <>
-                <Line x1={0} x2={w} y1={geo.y(threshold)} y2={geo.y(threshold)} stroke={colors.danger} strokeWidth={1.2} strokeDasharray="5,4" />
-                <SvgText x={w - 4} y={geo.y(threshold) - 5} fontSize={10} fill={colors.danger} textAnchor="end">
-                  {thresholdLabel ?? ''} {threshold}
-                </SvgText>
-              </>
-            )}
-            <Path d={geo.area} fill="url(#g)" />
-            <Path d={geo.d} stroke={color} strokeWidth={2} fill="none" strokeLinejoin="round" />
-            {cur != null && (
-              <>
-                {idx != null && <Line x1={geo.x(i)} x2={geo.x(i)} y1={PAD_T} y2={height - PAD_B} stroke={colors.ink} strokeWidth={1} opacity={0.3} />}
-                <Circle cx={geo.x(i)} cy={geo.y(cur)} r={5} fill="#fff" stroke={color} strokeWidth={2.5} />
-              </>
-            )}
-          </Svg>
-        )}
+      <View onLayout={(e) => setW(e.nativeEvent.layout.width)}>
+        <ScrubArea
+          height={height}
+          onScrub={scrub}
+          onEnd={() => setTimeout(() => setIdx(null), 1800)}
+        >
+          {geo && (
+            <Svg width={w} height={height} pointerEvents="none">
+              <Defs>
+                <LinearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+                  <Stop offset="0" stopColor={color} stopOpacity={0.28} />
+                  <Stop offset="1" stopColor={color} stopOpacity={0} />
+                </LinearGradient>
+              </Defs>
+              <Line x1={0} x2={w} y1={height - PAD_B} y2={height - PAD_B} stroke={colors.line} strokeWidth={1} />
+              {geo.ticks.map((t) => (
+                <React.Fragment key={t.x}>
+                  <Line x1={t.x} x2={t.x} y1={PAD_T} y2={height - PAD_B} stroke={colors.line} strokeWidth={1} strokeDasharray="2,4" />
+                  <SvgText x={t.x + 3} y={height - 6} fontSize={10} fill={colors.muted}>{t.label}</SvgText>
+                </React.Fragment>
+              ))}
+              {threshold != null && (
+                <>
+                  <Line x1={0} x2={w} y1={geo.y(threshold)} y2={geo.y(threshold)} stroke={colors.danger} strokeWidth={1.2} strokeDasharray="5,4" />
+                  <SvgText x={w - 4} y={geo.y(threshold) - 5} fontSize={10} fill={colors.danger} textAnchor="end">
+                    {thresholdLabel ?? ''} {threshold}
+                  </SvgText>
+                </>
+              )}
+              <Path d={geo.area} fill="url(#g)" />
+              <Path d={geo.d} stroke={color} strokeWidth={2} fill="none" strokeLinejoin="round" />
+              {cur != null && (
+                <>
+                  {idx != null && <Line x1={geo.x(i)} x2={geo.x(i)} y1={PAD_T} y2={height - PAD_B} stroke={colors.ink} strokeWidth={1} opacity={0.3} />}
+                  <Circle cx={geo.x(i)} cy={geo.y(cur)} r={5} fill="#fff" stroke={color} strokeWidth={2.5} />
+                </>
+              )}
+            </Svg>
+          )}
+        </ScrubArea>
       </View>
       <View style={styles.foot}>
         <Text style={styles.footText}>Min {min.toFixed(decimals)}</Text>

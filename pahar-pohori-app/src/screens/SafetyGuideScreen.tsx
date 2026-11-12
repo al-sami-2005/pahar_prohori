@@ -17,7 +17,7 @@ export default function SafetyGuideScreen() {
   const [open, setOpen] = useState<Record<string, boolean>>({ warningSigns: true, during: true });
 
   return (
-    <Screen back title={t('guideTitle')} subtitle={t('moreSafetyBody')}>
+    <Screen back backTo="More" title={t('guideTitle')} subtitle={t('moreSafetyBody')}>
       <View style={{ flexDirection: isTablet ? 'row' : 'column', flexWrap: 'wrap', gap: space.md }}>
         {sections.map((s) => {
           const isOpen = isTablet || open[s.key];

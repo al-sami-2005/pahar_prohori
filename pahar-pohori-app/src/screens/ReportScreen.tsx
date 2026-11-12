@@ -68,7 +68,7 @@ export default function ReportScreen({ route }: Props) {
   };
 
   return (
-    <Screen back title={t('reportTitle')} subtitle={t('reportSubtitle')}>
+    <Screen back backTo="More" title={t('reportTitle')} subtitle={t('reportSubtitle')}>
       <Pressable style={styles.callout} onPress={() => callNumber('999')}>
         <Ionicons name="call" size={16} color={colors.danger} />
         <T style={[font.small, { flex: 1, color: colors.inkSoft }]}>{t('ifDangerCall')}</T>

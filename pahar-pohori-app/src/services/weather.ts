@@ -12,12 +12,15 @@ const mem = new Map<string, RainForecast>();
 
 export type RainLevel = 'none' | 'light' | 'moderate' | 'heavy' | 'veryHeavy';
 
-/** Bangladesh Meteorological Department 24-hour rainfall categories (mm). */
+/**
+ * BMD-style bands, but ignore drizzle (&lt; 5 mm / 24h) so the UI does not
+ * scream "rain expected" when Open-Meteo only has a few tip-buckets.
+ */
 export function rainLevel(mm24: number): RainLevel {
   if (mm24 >= 89) return 'veryHeavy';
   if (mm24 >= 44) return 'heavy';
   if (mm24 >= 11) return 'moderate';
-  if (mm24 >= 1) return 'light';
+  if (mm24 >= 5) return 'light';
   return 'none';
 }
 
@@ -36,10 +39,16 @@ export async function fetchRain(lat: number, lon: number): Promise<RainForecast>
     hourly: { time: string[]; precipitation: (number | null)[]; precipitation_probability: (number | null)[]; soil_moisture_0_to_1cm: (number | null)[] };
   };
   const h = j.hourly;
-  // Open-Meteo times are local (Asia/Dhaka) without offset → find the current hour by local clock
-  const nowLocal = new Date(Date.now() + j.utc_offset_seconds * 1000).toISOString().slice(0, 13);
+  // Open-Meteo stamps are Asia/Dhaka wall-clock (no Z) — match that, not a hacked UTC ISO.
+  const nowLocal = new Date()
+    .toLocaleString('sv-SE', { timeZone: 'Asia/Dhaka' })
+    .slice(0, 13)
+    .replace(' ', 'T');
   let nowIndex = h.time.findIndex((t) => t.slice(0, 13) === nowLocal);
-  if (nowIndex < 0) nowIndex = 48;
+  if (nowIndex < 0) {
+    nowIndex = h.time.findIndex((t) => t.slice(0, 13) >= nowLocal);
+    if (nowIndex < 0) nowIndex = Math.min(48, Math.max(0, h.time.length - 1));
+  }
   const rain = h.precipitation.map((v) => v ?? 0);
   const sum = (a: number, b: number) => rain.slice(Math.max(0, a), Math.max(0, b)).reduce((x, y) => x + y, 0);
   const future = rain.slice(nowIndex, nowIndex + 72);
@@ -55,7 +64,8 @@ export async function fetchRain(lat: number, lon: number): Promise<RainForecast>
     next72: sum(nowIndex, nowIndex + 72),
     past48: sum(nowIndex - 48, nowIndex),
     peakHour: peak,
-    peakTime: peak > 0 ? h.time[nowIndex + peakIdx] : null,
+    // only call out a "heaviest hour" when it is meaningful rain
+    peakTime: peak >= 0.5 ? h.time[nowIndex + peakIdx] : null,
     fetchedAt: new Date().toISOString(),
   };
 }
@@ -67,7 +77,7 @@ export function useRainForecast(lat?: number, lon?: number) {
   useEffect(() => {
     if (lat == null || lon == null) return;
     let alive = true;
-    const key = `pp:rain:${lat.toFixed(3)},${lon.toFixed(3)}`;
+      const key = `pp:rain:v2:${lat.toFixed(3)},${lon.toFixed(3)}`;
     (async () => {
       const m = mem.get(key);
       if (m && Date.now() - new Date(m.fetchedAt).getTime() < TTL_MS) { setData(m); setStatus('ok'); return; }

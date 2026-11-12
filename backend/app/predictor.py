@@ -9,39 +9,43 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "ml"))
 from features import FEATURES, build_feature_row  # noqa: E402
 
-MODEL = joblib.load("ml/landslide_model.joblib")
+MODEL = joblib.load("ml/model.joblib")
 
-WINDOW = 30            # last N readings used as the "recent 24h" window
+WINDOW = 30            # archive-era sample count (~5h at 10 min); live uses time window
 DANGER_P = 0.60
-WATCH_P = 0.30
+WATCH_P = 0.45         # soft model cue only; levels prefer sensor evidence
 DANGER_HOLD_HOURS = 24
-# calibrated to data/nisar_clean.csv (SME2/GUNW scale in this dataset)
-SENSOR_WET = 0.32
-NISAR_WET = 0.22          # ~90th pct soil moisture
-NISAR_MOVING = 300.0      # ~75th pct derived LOS rate
+# calibrated to field archive + data/nisar_features.csv scale
+SENSOR_WET = 0.32      # confirms elevated wetness (DANGER path)
+SENSOR_WATCH = 0.28    # elevated but not failure-level
+RAIN_WATCH_MM = 12.0   # ~5h window; light drizzle stays under, monsoon forces WATCH
+NISAR_WET = 0.28
+NISAR_MOVING = 150.0
 
 
 def assess(readings, nisar, hill, previous=None):
     row = build_feature_row(readings, nisar, hill)
     prob = float(MODEL.predict_proba(pd.DataFrame([row])[FEATURES])[0, 1])
 
-    # --- cross-verification: do the ground sensors agree with the satellite? ---
     moisture_gap = abs(row["soil_moisture_now"] - nisar["nisar_soil_moisture"])
     sensor_wet = row["soil_moisture_now"] >= SENSOR_WET
+    sensor_elevated = row["soil_moisture_now"] >= SENSOR_WATCH
+    rain_elevated = row.get("rainfall_sum", 0) >= RAIN_WATCH_MM
+    rising = row["soil_moisture_change"] >= 0.03
     nisar_wet = nisar["nisar_soil_moisture"] >= NISAR_WET
     nisar_moving = nisar["los_velocity_mm_month"] >= NISAR_MOVING
     verified = sensor_wet and (nisar_wet or nisar_moving)
 
+    # Ground evidence first; model alone is poorly calibrated on synthetic sensors.
     if prob >= DANGER_P and verified:
         level = "DANGER"
-    elif prob >= DANGER_P:
-        level = "WATCH"      # model says high but satellite does not confirm -> no panic alarm
-    elif prob >= WATCH_P:
+    elif sensor_elevated or rain_elevated or (rising and sensor_wet) or (nisar_wet and sensor_elevated):
         level = "WATCH"
+    elif prob >= DANGER_P and sensor_elevated:
+        level = "WATCH"  # model high, sensors rising, satellite not confirming
     else:
         level = "SAFE"
 
-    # keep DANGER for 24h once triggered
     now = datetime.now(timezone.utc)
     danger_until = None
     if level == "DANGER":
@@ -52,10 +56,14 @@ def assess(readings, nisar, hill, previous=None):
     reasons = []
     if row["soil_moisture_now"] >= SENSOR_WET:
         reasons.append(f"Soil moisture high ({row['soil_moisture_now']:.2f} m3/m3)")
-    if row["soil_moisture_change"] >= 0.03:
+    elif row["soil_moisture_now"] >= SENSOR_WATCH:
+        reasons.append(f"Soil moisture elevated ({row['soil_moisture_now']:.2f} m3/m3)")
+    if rising:
         reasons.append(f"Soil getting wetter fast (+{row['soil_moisture_change']:.2f})")
     if row["accel_max"] >= 0.02:
         reasons.append(f"Ground movement detected (peak {row['accel_max']:.3f} g)")
+    if row.get("rainfall_sum", 0) >= RAIN_WATCH_MM:
+        reasons.append(f"Heavy rainfall in recent window ({row['rainfall_sum']:.1f} mm)")
     if nisar_moving:
         reasons.append(f"NISAR radar shows slope creep {nisar['los_velocity_mm_month']:.1f} mm/month")
     if nisar_wet:
@@ -64,6 +72,8 @@ def assess(readings, nisar, hill, previous=None):
         reasons.append(f"Steep slope ({hill['slope_deg']:.0f} deg)")
     if moisture_gap > 0.15:
         reasons.append("Warning: sensor and NISAR soil moisture disagree - check sensor")
+    if level == "SAFE" and not reasons:
+        reasons.append("Sensors and NISAR show stable ground conditions")
 
     return {
         "probability": round(prob, 3),

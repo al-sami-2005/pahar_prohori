@@ -19,7 +19,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <Screen back title={t('settingsTitle')}>
+    <Screen back backTo="More" title={t('settingsTitle')}>
       <SectionTitle title={t('language')} style={{ marginTop: 0 }} />
       <Segmented value={lang} onChange={(l) => updateSettings({ lang: l })}
         options={[{ key: 'en', label: 'English' }, { key: 'bn', label: 'বাংলা' }]} />

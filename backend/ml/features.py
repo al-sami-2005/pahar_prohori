@@ -9,6 +9,7 @@ FEATURES = [
     "humidity_mean",          # %
     "temperature_mean",       # C
     "wind_max",               # m/s
+    "rainfall_sum",           # mm total in recent window
     # NISAR + terrain features (per hill)
     "nisar_soil_moisture",    # m3/m3 from SME2
     "los_velocity_mm_month",  # ground creep from GUNW
@@ -21,6 +22,7 @@ def build_feature_row(readings, nisar, hill):
     """readings: list of dicts (oldest -> newest) with sensor fields."""
     sm = [r["soil_moisture"] for r in readings]
     acc = [r["acceleration"] for r in readings]
+    rain = [float(r.get("rainfall_mm") or 0) for r in readings]
     return {
         "soil_moisture_now": sm[-1],
         "soil_moisture_change": sm[-1] - sm[0],
@@ -29,6 +31,7 @@ def build_feature_row(readings, nisar, hill):
         "humidity_mean": sum(r["humidity"] for r in readings) / len(readings),
         "temperature_mean": sum(r["temperature"] for r in readings) / len(readings),
         "wind_max": max(r["wind_speed"] for r in readings),
+        "rainfall_sum": sum(rain),
         "nisar_soil_moisture": nisar["nisar_soil_moisture"],
         "los_velocity_mm_month": nisar["los_velocity_mm_month"],
         "coherence": nisar["coherence"],

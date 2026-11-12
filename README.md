@@ -10,9 +10,9 @@
 | :---: | :---: |
 | ![Map Dashboard](docs/screenshots/01-map-dashboard.png) | ![Hill Detail](docs/screenshots/02-hill-detail.png) |
 
-| Live System Pipeline & Node Monitor | Bilingual Danger Alerts (EN / বাংলা) |
+| Live Watch (Pipeline & Nodes) | Bilingual Danger Alerts (EN / বাংলা) |
 | :---: | :---: |
-| ![Live System](docs/screenshots/03-live-system.png) | ![Bilingual Alerts](docs/screenshots/04-bilingual-alerts.png) |
+| ![Live Watch](docs/screenshots/03-live-system.png) | ![Bilingual Alerts](docs/screenshots/04-bilingual-alerts.png) |
 
 ---
 
@@ -21,7 +21,7 @@
 ```text
 Field Sensor Nodes (CHT-NODE-01..06) ──▶ 7-Day Archive / POST /api/ingest
                                                    │
-NISAR Features (GUNW creep + SME2 moisture) ───────┼──▶ Random Forest Model (11 features, 30-reading window)
+NISAR Features (GUNW creep + SME2 moisture) ───────┼──▶ Random Forest Model (12 features, 30-reading window)
                                                    │
                                       Cross-verification & 24h DANGER hold
                                                    │
@@ -36,34 +36,17 @@ NISAR Features (GUNW creep + SME2 moisture) ───────┼──▶ Ra
 ## Project Structure
 
 ```text
-Pahar Pohori/
-├── docs/
-│   └── screenshots/                  # Application screenshots
-├── landslide-backend-for-frontend/   # FastAPI backend, SQLite store, ML model & sensor archive
-│   ├── app/
-│   │   ├── main.py                   # FastAPI entrypoint, API routes & static web serving
-│   │   ├── db.py                     # SQLite schema & 7-day field archive loader
-│   │   ├── predictor.py              # Random Forest inference + NISAR cross-verification
-│   │   ├── status_refresh.py         # Recomputes SAFE/WATCH/DANGER across all hills
-│   │   ├── alerts.py                 # Bilingual alert persistence with 6h cooldown
-│   │   ├── public.py                 # Summary, shelters, SOS contacts & community reports
-│   │   ├── timeline.py               # 7-day hourly risk replay (/api/risk-timeline)
-│   │   └── live.py                   # Live pipeline telemetry (/api/system-status, /api/live-feed, /api/ingest)
-│   ├── ml/                           # Feature definitions, training script & saved model artifact
-│   ├── sensors/                      # Field archive builder & ingestion utilities
-│   ├── data/                         # Hills, shelters, NISAR features & 7-day readings CSVs
-│   ├── docs/frontend-api.html        # Interactive API reference page (/guide)
+pahar_prohori/
+├── docs/screenshots/
+├── backend/                 # FastAPI + SQLite + ML + sensor archive
+│   ├── app/                 # main, db, predictor, refresh, status, live, public, …
+│   ├── ml/                  # features, make_train, train, model
+│   ├── sensors/             # build_archive, load_archive
+│   ├── scripts/export_snapshot.py
+│   ├── data/
+│   ├── docs/api.html
 │   └── requirements.txt
-└── pahar-pohori-app/                 # Expo (SDK 58) React Native + Web bilingual frontend
-    ├── App.tsx
-    ├── src/
-    │   ├── api.ts                    # Typed API client & automatic origin resolution
-    │   ├── store.tsx                 # Global state, offline cache, queued reports & polling
-    │   ├── i18n.ts                   # English & Bangla translations
-    │   ├── screens/                  # Map, HillDetail, Alerts, SOS, Shelters, Route, Report, Settings, LiveSystem
-    │   ├── components/               # Leaflet web maps, native maps, charts & UI primitives
-    │   └── services/                 # Road routing (OSRM), rain forecast (Open-Meteo), speech (expo-speech)
-    └── package.json
+└── pahar-pohori-app/        # Expo RN + web
 ```
 
 ---
@@ -72,7 +55,7 @@ Pahar Pohori/
 
 - **Interactive Risk Map:** Color-coded risk pins and probability circles (`SAFE`, `WATCH`, `DANGER`), 12 community shelters, community hazard report pins, 7-day risk replay timeline, and switchable Standard / Satellite / Terrain OpenStreetMap-based layers.
 - **Hill Detail & Telemetry:** Live ground sensor tiles (soil moisture, ground shaking, humidity, temperature, wind), interactive 7-day charts, Open-Meteo rain forecast, NISAR satellite metrics, and step-by-step action guidance with text-to-speech (`expo-speech`).
-- **Live System Monitor:** Real-time pipeline telemetry showing sensor packet counts, NISAR pass status, Random Forest run latency, per-hill sparklines, and a streaming event log.
+- **Live Watch:** Real-time pipeline telemetry showing sensor packet counts, NISAR pass status, model run latency, per-hill sparklines, and a streaming event log.
 - **Bilingual Alerts & Offline Support:** Simultaneous Bangla & English alert feed, offline device cache with built-in fallback snapshot, and automatic background submission for queued citizen hazard reports.
 - **SOS & Shelter Routing:** Press-and-hold `999` emergency dialer, national disaster hotlines (`999`, `1090`, `333`), distance-sorted shelters, and turn-by-turn walking/driving shelter routes.
 
@@ -80,10 +63,10 @@ Pahar Pohori/
 
 ## Quick Start
 
-### 1. Backend (`landslide-backend-for-frontend`)
+### 1. Backend (`backend`)
 
 ```bash
-cd landslide-backend-for-frontend
+cd backend
 python3 -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt

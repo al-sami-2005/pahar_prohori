@@ -1,5 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { goBackSmart } from '../navigation/back';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -121,7 +122,7 @@ export default function RouteScreen({ route: navRoute, navigation }: Props) {
   if (!shelter || !origin) {
     return (
       <View style={[styles.root, { paddingTop: insets.top + 12, paddingHorizontal: 16 }]}>
-        <RoundBtn icon="chevron-back" onPress={() => navigation.goBack()} label={t('back')} />
+        <RoundBtn icon="chevron-back" onPress={() => goBackSmart(navigation)} label={t('back')} />
       </View>
     );
   }
@@ -157,7 +158,7 @@ export default function RouteScreen({ route: navRoute, navigation }: Props) {
 
       {/* top controls */}
       <View style={[styles.topBar, { top: insets.top + 10 }]} pointerEvents="box-none">
-        <RoundBtn icon="chevron-back" onPress={() => { stopLive(); navigation.goBack(); }} label={t('back')} />
+        <RoundBtn icon="chevron-back" onPress={() => { stopLive(); goBackSmart(navigation); }} label={t('back')} />
         <View style={{ flex: 1 }} />
         <RoundBtn icon={mapType === 'satellite' ? 'map' : 'earth'} label={t('mapSatellite')}
           onPress={() => setMapType(mapType === 'satellite' ? 'standard' : 'satellite')} />
@@ -278,7 +279,7 @@ export default function RouteScreen({ route: navRoute, navigation }: Props) {
           <View style={styles.divider} />
           <View style={styles.actions}>
             <Action icon="share-social" label={t('share')} onPress={share} />
-            <Pressable style={{ alignItems: 'center', gap: 6 }} onPress={() => (live ? stopLive() : navigation.goBack())} accessibilityRole="button">
+            <Pressable style={{ alignItems: 'center', gap: 6 }} onPress={() => (live ? stopLive() : goBackSmart(navigation))} accessibilityRole="button">
               <View style={styles.finish}><Ionicons name="close" size={30} color="#fff" /></View>
               <Text style={styles.actionLabel}>{live ? t('stopLive') : t('finish')}</Text>
             </Pressable>

@@ -28,7 +28,7 @@ export const light = {
   elevated: '#FFFFFF',
   ink: '#111214',
   inkSoft: '#3A3B3E',
-  muted: '#8B8D92',
+  muted: '#5F6166',
   line: '#E6E6E3',
   chip: '#ECECEA',
   chipOn: '#111214',

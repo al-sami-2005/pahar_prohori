@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { HillRow } from '../components/HillCard';
 import { Button, Card, Chip, EmptyState, ListenButton, Screen, SectionTitle, SourceBanner, T, digits, useResponsive } from '../components/ui';
 import { speak, stopSpeaking } from '../services/speech';
@@ -32,7 +32,8 @@ export default function AlertsScreen() {
   const toShelter = (hillId: number) => {
     const h = hills.find((x) => x.hill_id === hillId);
     const s = h && nearestShelters(h.lat, h.lon, shelters, 1)[0];
-    if (s) nav.navigate('Route', { shelterId: s.shelter_id, fromHillId: hillId });
+    if (!s) { Alert.alert(t('tabShelters'), t('noShelterNearby')); return; }
+    nav.navigate('Route', { shelterId: s.shelter_id, fromHillId: hillId });
   };
 
   return (
