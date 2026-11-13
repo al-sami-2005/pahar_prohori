@@ -19,7 +19,12 @@ export function BottomSheet({ snap, onSnap, heights, height, bottom, children, h
 
   useEffect(() => {
     cur.current = heights[snap];
-    Animated.spring(height, { toValue: heights[snap], useNativeDriver: false, bounciness: 4, speed: 14 }).start();
+    Animated.spring(height, {
+      toValue: heights[snap],
+      useNativeDriver: false,
+      tension: 68,
+      friction: 11,
+    }).start();
   }, [snap, heights[0], heights[1], heights[2]]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pan = useMemo(() => PanResponder.create({
@@ -35,7 +40,12 @@ export function BottomSheet({ snap, onSnap, heights, height, bottom, children, h
       heights.forEach((h, i) => { if (Math.abs(h - v) < Math.abs(heights[best] - v)) best = i as Snap; });
       onSnap(best);
       cur.current = heights[best];
-      Animated.spring(height, { toValue: heights[best], useNativeDriver: false, bounciness: 4, speed: 14 }).start();
+      Animated.spring(height, {
+        toValue: heights[best],
+        useNativeDriver: false,
+        tension: 68,
+        friction: 11,
+      }).start();
     },
   }), [heights, height, onSnap]);
 

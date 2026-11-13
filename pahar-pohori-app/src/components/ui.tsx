@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import {
-  ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View,
+  ActivityIndicator, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View,
   useWindowDimensions, type StyleProp, type TextStyle, type ViewStyle,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -93,7 +93,14 @@ export function Card({ children, style, onPress }: {
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      style={({ pressed }) => [base, pressed && { opacity: 0.85, transform: [{ scale: 0.995 }] }, { cursor: 'pointer' as const }]}
+      style={({ pressed }) => [
+        base,
+        pressed && { opacity: 0.88, transform: [{ scale: 0.992 }] },
+        Platform.select({
+          web: { cursor: 'pointer', transition: 'transform 0.15s cubic-bezier(0.2, 0, 0, 1), opacity 0.15s ease' } as object,
+          default: {},
+        }),
+      ]}
     >
       {children}
     </Pressable>
@@ -181,7 +188,11 @@ export function Button({ label, onPress, icon, variant = 'primary', disabled, lo
         { backgroundColor: bg },
         variant === 'outline' && { borderWidth: 1, borderColor: c.line },
         (disabled || loading) && { opacity: 0.5 },
-        pressed && { opacity: 0.8 },
+        pressed && { opacity: 0.82, transform: [{ scale: 0.98 }] },
+        Platform.select({
+          web: { cursor: 'pointer', transition: 'transform 0.12s cubic-bezier(0.2, 0, 0, 1), opacity 0.12s ease' } as object,
+          default: {},
+        }),
         style,
       ]}
     >
@@ -267,8 +278,20 @@ export function Segmented<K extends string>({ value, options, onChange, small }:
       {options.map((o) => {
         const on = o.key === value;
         return (
-          <Pressable key={o.key} onPress={() => onChange(o.key)} accessibilityRole="radio" accessibilityState={{ checked: on }}
-            style={{ flex: 1, flexDirection: 'row', gap: 6, justifyContent: 'center', alignItems: 'center', paddingVertical: small ? 8 : 11, borderRadius: radius.pill, backgroundColor: on ? c.chipOn : 'transparent' }}>
+          <Pressable
+            key={o.key}
+            onPress={() => onChange(o.key)}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: on }}
+            style={({ pressed }) => [
+              { flex: 1, flexDirection: 'row', gap: 6, justifyContent: 'center', alignItems: 'center', paddingVertical: small ? 8 : 11, borderRadius: radius.pill, backgroundColor: on ? c.chipOn : 'transparent' },
+              pressed && { opacity: 0.82 },
+              Platform.select({
+                web: { cursor: 'pointer', transition: 'background-color 0.18s cubic-bezier(0.2, 0, 0, 1), opacity 0.12s ease' } as object,
+                default: {},
+              }),
+            ]}
+          >
             {o.icon && <Ionicons name={o.icon} size={15} color={on ? c.chipOnText : c.inkSoft} />}
             <Text style={{ fontWeight: '600', fontSize: small ? 13 : 14, color: on ? c.chipOnText : c.inkSoft }} numberOfLines={1}>{o.label}</Text>
           </Pressable>

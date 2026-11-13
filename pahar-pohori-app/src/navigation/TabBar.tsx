@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import React from 'react';
-import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Image, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+
+const BRAND_MARK = require('../../assets/brand-mark.png');
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { StringKey } from '../i18n';
 import { useApp } from '../store';
@@ -35,9 +37,20 @@ function Rail({ state, navigation }: BottomTabBarProps) {
   const recent = alerts.filter((a) => new Date(a.created_at).getTime() > Date.now() - 864e5).length;
   return (
     <View style={{ width: 84, backgroundColor: c.surface, borderRightWidth: 1, borderColor: c.line, paddingTop: insets.top + 14, alignItems: 'center', gap: 6 }}>
-      <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: c.danger, alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
-        <Ionicons name="triangle" size={20} color="#fff" />
-      </View>
+      <Pressable
+        onPress={() => navigation.navigate('Map')}
+        accessibilityRole="button"
+        accessibilityLabel={t('appName')}
+        style={({ pressed }) => ({
+          width: 44, height: 44, borderRadius: 14,
+          backgroundColor: c.dark ? c.surfaceAlt : '#FFFFFF',
+          borderWidth: 1, borderColor: c.line,
+          alignItems: 'center', justifyContent: 'center', marginBottom: 14,
+          opacity: pressed ? 0.8 : 1,
+        })}
+      >
+        <Image source={BRAND_MARK} style={{ width: 32, height: 32 }} resizeMode="contain" />
+      </Pressable>
       {state.routes.map((route, index) => {
         const focused = state.index === index;
         const cfg = TABS[route.name];
@@ -47,8 +60,18 @@ function Rail({ state, navigation }: BottomTabBarProps) {
           if (!focused && !e.defaultPrevented) navigation.navigate(route.name);
         };
         return (
-          <Pressable key={route.key} onPress={onPress} accessibilityRole="tab" accessibilityState={{ selected: focused }} accessibilityLabel={t(cfg.label)}
-            style={{ alignItems: 'center', gap: 4, paddingVertical: 8, width: 76 }}>
+          <Pressable
+            key={route.key}
+            onPress={onPress}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: focused }}
+            accessibilityLabel={t(cfg.label)}
+            style={({ pressed }) => [
+              { alignItems: 'center', gap: 4, paddingVertical: 8, width: 76 },
+              pressed && { opacity: 0.75, transform: [{ scale: 0.95 }] },
+              Platform.select({ web: { cursor: 'pointer', transition: 'transform 0.12s ease, opacity 0.12s ease' } as object, default: {} }),
+            ]}
+          >
             <View style={{ width: 56, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center',
               backgroundColor: sos ? c.danger : focused ? (c.dark ? '#1C2A3D' : '#E8F0FE') : 'transparent' }}>
               <Ionicons name={focused ? cfg.iconActive : cfg.icon} size={21} color={sos ? '#fff' : focused ? (c.dark ? '#8AB4F8' : '#1A73E8') : c.inkSoft} />
@@ -93,16 +116,35 @@ function BottomBar({ state, navigation }: BottomTabBarProps) {
           };
           if (route.name === 'SOS') {
             return (
-              <Pressable key={route.key} onPress={onPress} style={styles.item} accessibilityRole="button"
-                accessibilityLabel={t('tabSOS')}>
+              <Pressable
+                key={route.key}
+                onPress={onPress}
+                style={({ pressed }) => [
+                  styles.item,
+                  pressed && { opacity: 0.85, transform: [{ scale: 0.94 }] },
+                  Platform.select({ web: { cursor: 'pointer', transition: 'transform 0.12s ease, opacity 0.12s ease' } as object, default: {} }),
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel={t('tabSOS')}
+              >
                 <View style={styles.sos}><Ionicons name="call" size={24} color="#fff" /></View>
                 <Text style={[styles.label, { color: colors.danger, fontWeight: '700' }]}>{t('tabSOS')}</Text>
               </Pressable>
             );
           }
           return (
-            <Pressable key={route.key} onPress={onPress} style={styles.item} accessibilityRole="tab"
-              accessibilityState={{ selected: focused }} accessibilityLabel={t(cfg.label)}>
+            <Pressable
+              key={route.key}
+              onPress={onPress}
+              style={({ pressed }) => [
+                styles.item,
+                pressed && { opacity: 0.75, transform: [{ scale: 0.94 }] },
+                Platform.select({ web: { cursor: 'pointer', transition: 'transform 0.12s ease, opacity 0.12s ease' } as object, default: {} }),
+              ]}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: focused }}
+              accessibilityLabel={t(cfg.label)}
+            >
               <View>
                 <Ionicons name={focused ? cfg.iconActive : cfg.icon} size={22} color={focused ? colors.ink : colors.muted} />
                 {route.name === 'Alerts' && recentAlerts > 0 && (

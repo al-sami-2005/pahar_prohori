@@ -2,7 +2,10 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Animated, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Image, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+
+const BRAND_LOGO = require('../../assets/brand-logo.png');
+const BRAND_MARK = require('../../assets/brand-mark.png');
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomSheet, type Snap } from '../components/BottomSheet';
 import { LayerSheet, ReplayBar } from '../components/MapControls';
@@ -133,8 +136,13 @@ export default function MapScreen() {
     <Pressable onPress={() => setSearchOpen(true)} accessibilityRole="search" accessibilityLabel={t('searchHills')}
       style={[{ flexDirection: 'row', alignItems: 'center', gap: 12, height: 52, borderRadius: 28, paddingLeft: 8, paddingRight: 6,
         backgroundColor: c.elevated, borderWidth: c.dark ? 1 : 0, borderColor: c.line }, !wide && shadow]}>
-      <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: c.danger, alignItems: 'center', justifyContent: 'center' }}>
-        <Ionicons name="triangle" size={16} color="#fff" />
+      <View style={{
+        width: 36, height: 36, borderRadius: 18,
+        backgroundColor: c.dark ? c.surfaceAlt : '#FFFFFF',
+        borderWidth: 1, borderColor: c.line,
+        alignItems: 'center', justifyContent: 'center',
+      }}>
+        <Image source={BRAND_MARK} style={{ width: 26, height: 26 }} resizeMode="contain" />
       </View>
       <Text style={{ flex: 1, color: c.muted, fontSize: 16 }} numberOfLines={1}>
         {lang === 'bn' ? 'পাহাড়, আশ্রয় বা স্থান খুঁজুন' : 'Search hills, shelters, places'}
@@ -269,7 +277,18 @@ export default function MapScreen() {
             <SearchOverlay inline initial="" onPick={onPick} onClose={() => setSearchOpen(false)} />
           ) : (
             <>
-              <View style={{ padding: space.lg, paddingBottom: space.sm }}>{searchPill}</View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space.lg, paddingTop: space.lg, paddingBottom: space.xs }}>
+                <Image
+                  source={BRAND_LOGO}
+                  style={{ width: 150, height: 26 }}
+                  resizeMode="contain"
+                  accessibilityLabel="Orbit2Slope"
+                />
+                <Text style={{ color: c.muted, fontSize: 12, fontWeight: '600' }} numberOfLines={1}>
+                  {t('appName')}
+                </Text>
+              </View>
+              <View style={{ paddingHorizontal: space.lg, paddingTop: space.xs, paddingBottom: space.sm }}>{searchPill}</View>
               {dangerBanner && <View style={{ paddingHorizontal: space.lg, paddingBottom: space.sm }}>{dangerBanner}</View>}
               <ScrollView key={sel ? `${sel.kind}:${sel.kind === 'place' ? sel.place.id : sel.id}` : 'explore'} contentContainerStyle={{ paddingTop: space.sm, paddingBottom: 40 }}>{sheetContent}</ScrollView>
             </>

@@ -2,7 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+
+const BRAND_LOGO = require('../../assets/brand-logo.png');
 import { Card, Screen, SectionTitle, Segmented, StatusBadge, T, type IconName } from '../components/ui';
 import type { StringKey } from '../i18n';
 import type { RootStack } from '../navigation';
@@ -46,14 +48,31 @@ export default function MoreScreen() {
   return (
     <Screen title={t('moreTitle')} subtitle={t('tagline')}>
       <View style={styles.brand}>
-        <View style={styles.logo}><Ionicons name="triangle" size={22} color="#fff" /></View>
-        <View style={{ flex: 1 }}>
-          <T style={font.h2}>{t('appName')}</T>
-          <T style={[font.small, { color: colors.muted }]}>NASA Space Apps · NISAR</T>
+        <View style={styles.brandInfo}>
+          <View style={styles.brandLogoWrap}>
+            <Image
+              source={BRAND_LOGO}
+              style={styles.brandLogo}
+              resizeMode="contain"
+              accessibilityLabel="Orbit2Slope"
+            />
+          </View>
+          <T style={[font.small, { color: colors.muted }]} numberOfLines={1}>
+            {t('appName')} · NASA Space Apps · NISAR
+          </T>
         </View>
         <View style={styles.langSwitch}>
           {(['en', 'bn'] as const).map((l) => (
-            <Pressable key={l} onPress={() => updateSettings({ lang: l })} style={[styles.langBtn, lang === l && styles.langOn]}>
+            <Pressable
+              key={l}
+              onPress={() => updateSettings({ lang: l })}
+              style={({ pressed }) => [
+                styles.langBtn,
+                lang === l && styles.langOn,
+                pressed && { opacity: 0.8 },
+                Platform.select({ web: { cursor: 'pointer', transition: 'background-color 0.18s ease' } as object, default: {} }),
+              ]}
+            >
               <Text style={[styles.langText, lang === l && { color: colors.chipOnText }]}>{l === 'en' ? 'EN' : 'বাং'}</Text>
             </Pressable>
           ))}
@@ -89,8 +108,33 @@ export default function MoreScreen() {
 }
 
 const useStyles = makeStyles((colors) => ({
-  brand: { flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: colors.surface, padding: space.lg, borderRadius: radius.lg },
-  logo: { width: 48, height: 48, borderRadius: 14, backgroundColor: colors.danger, alignItems: 'center', justifyContent: 'center' },
+  brand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: space.md,
+    backgroundColor: colors.surface,
+    padding: space.lg,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
+  brandInfo: {
+    flex: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  brandLogoWrap: {
+    width: 174,
+    height: 30,
+    alignSelf: 'flex-start',
+    overflow: 'hidden',
+  },
+  brandLogo: {
+    width: 174,
+    height: 30,
+  },
   langSwitch: { flexDirection: 'row', backgroundColor: colors.chip, borderRadius: 999, padding: 3 },
   langBtn: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999 },
   langOn: { backgroundColor: colors.chipOn },
